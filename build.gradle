@@ -64,6 +64,10 @@ dependencies {
 
     // monitoring
     implementation 'io.micrometer:micrometer-registry-prometheus'
+
+    // AI / LangChain
+    implementation 'dev.langchain4j:langchain4j:1.0.0-beta1'
+    implementation 'dev.langchain4j:langchain4j-google-ai-gemini:1.0.0-beta1'
 }
 
 tasks.named('test') {
@@ -85,10 +89,8 @@ jacocoTestReport {
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
             fileTree(dir: it, exclude: [
-                "com/gdg/Todak/TodakApplication.class",
-                "**/dto/**",
-                "**/domain/**",
-                "**/exception/**"
+                "**/controller/advice/**",
+                "**/*ControllerAdvice.*"
             ])
         }))
     }
