@@ -1,10 +1,13 @@
 package com.gdg.Todak.member.service;
 
 import com.gdg.Todak.member.controller.dto.LoginForm;
+import com.gdg.Todak.member.controller.request.ProfileRequest;
 import com.gdg.Todak.member.domain.AuthenticateUser;
 import com.gdg.Todak.member.domain.Member;
 import com.gdg.Todak.member.domain.MemberRole;
 import com.gdg.Todak.member.domain.Role;
+import com.gdg.Todak.member.exception.BadRequestException;
+import com.gdg.Todak.member.exception.FileException;
 import com.gdg.Todak.member.exception.UnauthorizedException;
 import com.gdg.Todak.member.repository.MemberRepository;
 import com.gdg.Todak.member.repository.MemberRoleRepository;
@@ -19,10 +22,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
@@ -37,8 +45,22 @@ public class MemberService {
     private final PointService pointService;
     private final TreeService treeService;
 
+    private static final List<String> ALLOWED_MIME_TYPES = Arrays.asList(
+            "image/jpeg",   // JPG 이미지
+            "image/png",    // PNG 이미지
+            "image/gif",    // GIF 이미지
+            "image/bmp",    // BMP 이미지
+            "image/webp",   // WEBP 이미지
+            "image/svg+xml" // SVG 이미지
+    );
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
+
     @Value("${DEFAULT_PROFILE_IMAGE_URL}")
     private String defaultProfileImageUrl;
+    @Value("${file.path}")
+    private String uploadFolder;
+    @Value("${image.url}")
+    private String imageUrl;
 
     public CheckUserIdServiceResponse checkUserId(CheckUserIdServiceRequest serviceRequest) {
         Optional<Member> findMember = memberRepository.findByUserId(serviceRequest.getUserId());
@@ -104,16 +126,75 @@ public class MemberService {
 
     public MeResponse me(AuthenticateUser user) {
         Member member = findMember(user.getUserId());
-        return MeResponse.of(member);
+        return MeResponse.from(member);
     }
 
     @Transactional
-    public MeResponse editMemberInfo(AuthenticateUser user, EditMemberServiceRequest serviceRequest) {
+    public MeResponse editMemberNickname(AuthenticateUser user, EditMemberNicknameServiceRequest serviceRequest) {
         Member member = findMember(user.getUserId());
-        member.setUserId(serviceRequest.getUserId());
         member.setNickname(serviceRequest.getNickname());
-        member.setImageUrl(serviceRequest.getImageUrl());
-        return MeResponse.of(member);
+        return MeResponse.of(member.getUserId(), member.getNickname(), member.getImageUrl());
+    }
+
+    @Transactional
+    public MeResponse editMemberProfileImage(AuthenticateUser user, ProfileRequest serviceRequest) {
+        MultipartFile file = serviceRequest.file();
+        if (file.isEmpty()) throw new BadRequestException("이미지가 비어있습니다.");
+        if (file.getSize() > MAX_FILE_SIZE) throw new BadRequestException("파일 크기가 10MB를 초과했습니다.");
+        if (!ALLOWED_MIME_TYPES.contains(file.getContentType()))
+            throw new BadRequestException("잘못된 형식의 이미지를 업로드하였습니다. (가능한 형식: jpg, png, gif, bmp, webp, svg)");
+
+        String subDirectory = user.getUserId() + "/profile_image";
+        try {
+            Path directoryPath = Paths.get(uploadFolder + subDirectory);
+            if (!Files.exists(directoryPath)) {
+                Files.createDirectories(directoryPath);
+            }
+        } catch (IOException e) {
+            throw new FileException("이미지 업로드를 실패하였습니다.");
+        }
+
+        String uploadDestination = uploadFolder + subDirectory + "/" + file.getOriginalFilename();
+
+        File destinationFile = new File(uploadDestination);
+
+        try {
+            Member member = findMember(user.getUserId());
+            if (!member.getImageUrl().equals(defaultProfileImageUrl)) {
+                deleteAllImagesInFolder(uploadFolder + subDirectory);
+            }
+            file.transferTo(destinationFile);
+            member.updateImageUrl(imageUrl + subDirectory + "/" + file.getOriginalFilename());
+
+            return MeResponse.of(member.getUserId(), member.getNickname(), member.getImageUrl());
+        } catch (IOException e) {
+            throw new FileException("프로필 이미지 저장 중 오류가 발생했습니다.");
+        }
+    }
+
+    @Transactional
+    public String deleteMemberProfileImage(AuthenticateUser user) {
+        Member member = findMember(user.getUserId());
+        deleteAllImagesInFolder(uploadFolder + user.getUserId() + "/profile_image");
+        member.updateImageUrl(defaultProfileImageUrl);
+        return "프로필 이미지가 삭제되고 기본 이미지로 변경되었습니다.";
+    }
+
+    public void deleteAllImagesInFolder(String folderPath) {
+        Path dirPath = Paths.get(folderPath);
+        if (!Files.exists(dirPath) || !Files.isDirectory(dirPath)) {
+            throw new FileException("유효하지 않은 폴더 경로입니다: " + folderPath);
+        }
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(dirPath)) {
+            for (Path filePath : stream) {
+                if (Files.isRegularFile(filePath)) {
+                    Files.delete(filePath);
+                }
+            }
+        } catch (IOException e) {
+            throw new FileException("이미지 파일 삭제 중 오류 발생: " + e.getMessage());
+        }
     }
 
     @Transactional
