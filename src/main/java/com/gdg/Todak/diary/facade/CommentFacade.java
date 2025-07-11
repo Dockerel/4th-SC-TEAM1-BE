@@ -29,6 +29,10 @@ public class CommentFacade {
         pointService.earnPointByType(new PointRequest(comment.getMember(), PointType.COMMENT));
 
         // 3. 알림 이벤트 발행
+        publishNotification(userId, comment);
+    }
+
+    private void publishNotification(String userId, Comment comment) {
         PublishNotificationRequest notificationRequest = PublishNotificationRequest.of(
                 userId,
                 comment.getDiary().getMember().getUserId(),

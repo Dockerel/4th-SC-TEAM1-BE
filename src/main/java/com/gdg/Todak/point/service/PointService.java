@@ -17,6 +17,7 @@ import com.gdg.Todak.point.repository.PointRepository;
 import com.gdg.Todak.tree.domain.GrowthButton;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -133,7 +134,7 @@ public class PointService {
         };
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED)
     public void earnPointByType(PointRequest pointRequest) {
         String lockKey = LOCK_PREFIX + pointRequest.member().getId();
 
@@ -186,7 +187,7 @@ public class PointService {
 
         Point point = getPoint(member);
         PointType pointType = PointType.GET_COMMENT_WRITER_ID;
-        
+
         int consumedPoint = point.consumePointToGetCommentWriterId(GET_COMMENT_WRITER_ID_POINT);
 
         pointLogService.createPointLog(new PointLogRequest(member, consumedPoint, pointType, PointStatus.CONSUMED, LocalDateTime.now()));

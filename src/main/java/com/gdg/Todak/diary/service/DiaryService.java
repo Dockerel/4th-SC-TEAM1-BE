@@ -10,14 +10,11 @@ import com.gdg.Todak.friend.service.FriendCheckService;
 import com.gdg.Todak.member.domain.Member;
 import com.gdg.Todak.member.repository.MemberRepository;
 import com.gdg.Todak.notification.service.NotificationService;
-import com.gdg.Todak.point.PointType;
-import com.gdg.Todak.point.dto.PointRequest;
 import com.gdg.Todak.point.service.PointService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -38,8 +35,8 @@ public class DiaryService {
     private final PointService pointService;
     private final SchedulerService schedulerService;
 
-    @Transactional
-    public void writeDiary(String userId, DiaryRequest diaryRequest) {
+    @Transactional(propagation = Propagation.REQUIRED)
+    public Diary writeDiary(String userId, DiaryRequest diaryRequest) {
         Member member = getMember(userId);
 
         LocalDate today = LocalDate.now();
@@ -57,20 +54,7 @@ public class DiaryService {
                 .storageUUID(diaryRequest.storageUUID())
                 .build();
 
-        Diary saveDiary = diaryRepository.save(diary);
-
-        pointService.earnPointByType(new PointRequest(member, PointType.DIARY));
-
-        // AI 댓글 작성 예약
-        schedulerService.scheduleSavingCommentByAI(saveDiary);
-
-        // 알림 전송
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-                notificationService.publishPostNotifications(userId, "post", saveDiary.getId(), saveDiary.getCreatedAt());
-            }
-        });
+        return diaryRepository.save(diary);
     }
 
     public List<DiarySummaryResponse> getMySummaryByYearAndMonth(String userId, DiarySearchRequest diarySearchRequest) {
