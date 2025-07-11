@@ -19,9 +19,6 @@ import com.gdg.Todak.diary.util.MBTISelector;
 import com.gdg.Todak.friend.service.FriendCheckService;
 import com.gdg.Todak.member.domain.Member;
 import com.gdg.Todak.member.repository.MemberRepository;
-import com.gdg.Todak.notification.service.NotificationService;
-import com.gdg.Todak.point.PointType;
-import com.gdg.Todak.point.dto.PointRequest;
 import com.gdg.Todak.point.service.PointService;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -31,9 +28,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.ZoneId;
 import java.util.List;
@@ -52,7 +48,6 @@ public class CommentService {
     private final DiaryRepository diaryRepository;
     private final CommentAnonymousRevealRepository commentAnonymousRevealRepository;
     private final FriendCheckService friendCheckService;
-    private final NotificationService notificationService;
     private final PointService pointService;
     private final MBTISelector mbtiSelector;
     private final AiModelConfig aiModelConfig;
@@ -114,8 +109,8 @@ public class CommentService {
         return commentAnonymousRevealRepository.existsByMemberAndComment(member, comment);
     }
 
-    @Transactional
-    public void saveComment(String userId, Long diaryId, CommentRequest commentRequest) {
+    @Transactional(propagation = Propagation.REQUIRED)
+    public Comment saveComment(String userId, Long diaryId, CommentRequest commentRequest) {
         Member member = getMember(userId);
         Diary diary = getDiary(diaryId);
 
@@ -130,22 +125,7 @@ public class CommentService {
                 .content(commentRequest.content())
                 .diary(diary)
                 .build();
-
-        commentRepository.save(comment);
-
-        pointService.earnPointByType(new PointRequest(member, PointType.COMMENT));
-
-        String senderId = userId;
-        String receiverId = diary.getMember().getUserId();
-        // 알림 전송
-        if (!senderId.equals(receiverId)) { // 자신에게 자신이 댓글 알림을 보내는 것이 아닌 경우에만 알림 전송
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-                @Override
-                public void afterCommit() {
-                    notificationService.publishCommentNotification(senderId, receiverId, "comment", diary.getId(), diary.getCreatedAt());
-                }
-            });
-        }
+        return commentRepository.save(comment);
     }
 
     @Transactional
