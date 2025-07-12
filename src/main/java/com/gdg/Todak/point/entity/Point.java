@@ -86,4 +86,8 @@ public class Point {
             default -> throw new BadRequestException("올바른 growthButton이 아닙니다.");
         }
     }
+
+    public void updatePoint(int calculatedTotalPoint) {
+        this.point = calculatedTotalPoint;
+    }
 }

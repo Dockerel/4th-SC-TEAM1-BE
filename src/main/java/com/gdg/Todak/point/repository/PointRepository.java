@@ -12,4 +12,6 @@ public interface PointRepository extends JpaRepository<Point, Long> {
     boolean existsByMember(Member member);
 
     Optional<Point> findByMember(Member member);
+
+    Point findByMemberId(Long memberId);
 }
