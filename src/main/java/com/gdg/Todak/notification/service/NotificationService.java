@@ -2,10 +2,7 @@ package com.gdg.Todak.notification.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gdg.Todak.friend.FriendStatus;
-import com.gdg.Todak.friend.entity.Friend;
 import com.gdg.Todak.friend.repository.FriendRepository;
-import com.gdg.Todak.member.domain.Member;
 import com.gdg.Todak.notification.dto.PublishNotificationRequest;
 import com.gdg.Todak.notification.entity.Notification;
 import lombok.RequiredArgsConstructor;
@@ -13,10 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.DefaultStringRedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
@@ -51,7 +45,6 @@ public class NotificationService {
         return emitter;
     }
 
-    // todo: 오프라인 상태였던 동안 받지 못했던 알림들 받아오기
     public List<Notification> getStoredMessages(String userId) {
         Set<String> notificationIds = redisTemplate.opsForSet().members(userId);
 
@@ -109,42 +102,19 @@ public class NotificationService {
         });
     }
 
-    /**
-     * @param objectId : postId
-     * @param type     : "post" (새 글 알림)
-     */
-    public void publishPostNotifications(String senderId, String type, Long objectId, Instant diaryCreatedAt) {
-        List<Friend> friends = friendRepository.findAllByAccepterUserIdAndFriendStatusOrRequesterUserIdAndFriendStatus(
-                senderId, FriendStatus.ACCEPTED, // requester
-                senderId, FriendStatus.ACCEPTED // acceptor
-        );
-
-        friends.stream()
-                .forEach(friend -> {
-                    Member friendInfo = friend.getFriend(senderId);
-                    publishEventToRedis(objectId, senderId, friendInfo.getUserId(), type, diaryCreatedAt);
-                });
-    }
-
-    public void publishFriendAddRequestNotification(String senderId, String receiverId, String type) {
-        publishEventToRedis(null, senderId, receiverId, type, null);
-    }
-
-    @Async
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void publishNotification(PublishNotificationRequest request) {
         String senderId = request.getSenderId();
         String receiverId = request.getReceiverId();
-        Long objectId = request.getDiaryId();
         String type = request.getType();
+        Long objectId = request.getObjectId();
         Instant createdAt = request.getCreatedAt();
 
         if (senderId == receiverId) return;
 
-        publishEventToRedis(objectId, senderId, receiverId, type, createdAt);
+        publishEventToRedis(senderId, receiverId, type, objectId, createdAt);
     }
 
-    private void publishEventToRedis(Long objectId, String senderId, String receiverId, String type, Instant diaryCreatedAt) {
+    private void publishEventToRedis(String senderId, String receiverId, String type, Long objectId, Instant diaryCreatedAt) {
         String notificationKey = UUID.randomUUID().toString();
         Instant timestamp = Instant.now();
 

@@ -13,15 +13,15 @@ public class PublishNotificationRequest {
     private String senderId;
     private String receiverId;
     private String type;
-    private Long diaryId;
+    private Long objectId;
     private Instant createdAt;
 
-    public static PublishNotificationRequest of(String senderId, String receiverId, String type, Long diaryId, Instant createdAt) {
+    public static PublishNotificationRequest of(String senderId, String receiverId, String type, Long objectId, Instant createdAt) {
         return PublishNotificationRequest.builder()
                 .senderId(senderId)
                 .receiverId(receiverId)
                 .type(type)
-                .diaryId(diaryId)
+                .objectId(objectId)
                 .createdAt(createdAt)
                 .build();
     }

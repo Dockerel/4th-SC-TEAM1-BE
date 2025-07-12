@@ -2,6 +2,7 @@ package com.gdg.Todak.diary.controller;
 
 import com.gdg.Todak.common.domain.ApiResponse;
 import com.gdg.Todak.diary.dto.*;
+import com.gdg.Todak.diary.facade.DiaryFacade;
 import com.gdg.Todak.diary.service.DiaryService;
 import com.gdg.Todak.member.domain.AuthenticateUser;
 import com.gdg.Todak.member.resolver.Login;
@@ -20,13 +21,14 @@ import java.util.List;
 @Tag(name = "일기", description = "일기 관련 API")
 public class DiaryController {
 
+    private final DiaryFacade diaryFacade;
     private final DiaryService diaryService;
 
     @PostMapping
     @Operation(summary = "일기 작성 / 감정 등록", description = "일기를 작성한다. 감정만 등록하기도 가능. 감정은 HAPPY, SAD, ANGRY, EXCITED, NEUTRAL")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<Void> writeDiary(@Parameter(hidden = true) @Login AuthenticateUser authenticateUser, @RequestBody DiaryRequest diaryRequest) {
-        diaryService.writeDiary(authenticateUser.getUserId(), diaryRequest);
+        diaryFacade.writeDiary(authenticateUser.getUserId(), diaryRequest);
         return ApiResponse.of(HttpStatus.CREATED, "작성되었습니다.");
     }
 

@@ -9,8 +9,6 @@ import com.gdg.Todak.diary.repository.DiaryRepository;
 import com.gdg.Todak.friend.service.FriendCheckService;
 import com.gdg.Todak.member.domain.Member;
 import com.gdg.Todak.member.repository.MemberRepository;
-import com.gdg.Todak.notification.service.NotificationService;
-import com.gdg.Todak.point.service.PointService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -30,10 +28,7 @@ public class DiaryService {
     private final DiaryRepository diaryRepository;
     private final MemberRepository memberRepository;
     private final ImageService imageService;
-    private final NotificationService notificationService;
     private final FriendCheckService friendCheckService;
-    private final PointService pointService;
-    private final SchedulerService schedulerService;
 
     @Transactional(propagation = Propagation.REQUIRED)
     public Diary writeDiary(String userId, DiaryRequest diaryRequest) {
