@@ -7,4 +7,7 @@ public record PointRequest(
         Member member,
         PointType pointType
 ) {
+    public static PointRequest of(Member member, PointType pointType) {
+        return new PointRequest(member, pointType);
+    }
 }

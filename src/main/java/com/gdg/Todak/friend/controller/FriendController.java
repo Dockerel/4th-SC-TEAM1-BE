@@ -2,6 +2,7 @@ package com.gdg.Todak.friend.controller;
 
 import com.gdg.Todak.common.domain.ApiResponse;
 import com.gdg.Todak.friend.dto.*;
+import com.gdg.Todak.friend.facade.FriendFacade;
 import com.gdg.Todak.friend.service.FriendService;
 import com.gdg.Todak.member.domain.AuthenticateUser;
 import com.gdg.Todak.member.resolver.Login;
@@ -20,13 +21,14 @@ import java.util.List;
 @Tag(name = "친구", description = "친구 관련 API")
 public class FriendController {
 
+    private final FriendFacade friendFacade;
     private final FriendService friendService;
 
     @Operation(summary = "친구 요청 보내기", description = "친구의 이름을 기반으로 친구요청합니다.")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<Void> sendFriendRequest(@Parameter(hidden = true) @Login AuthenticateUser authenticateUser, @RequestBody FriendIdRequest friendIdRequest) {
-        friendService.makeFriendRequest(authenticateUser.getUserId(), friendIdRequest);
+        friendFacade.makeFriendRequest(authenticateUser.getUserId(), friendIdRequest);
         return ApiResponse.of(HttpStatus.CREATED, "친구 요청이 생성되었습니다.");
     }
 

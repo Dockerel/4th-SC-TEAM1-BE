@@ -3,6 +3,7 @@ package com.gdg.Todak.diary.controller;
 import com.gdg.Todak.common.domain.ApiResponse;
 import com.gdg.Todak.diary.dto.CommentRequest;
 import com.gdg.Todak.diary.dto.CommentResponse;
+import com.gdg.Todak.diary.facade.CommentFacade;
 import com.gdg.Todak.diary.service.CommentService;
 import com.gdg.Todak.member.domain.AuthenticateUser;
 import com.gdg.Todak.member.resolver.Login;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 public class CommentController {
 
     private final CommentService commentService;
+    private final CommentFacade commentFacade;
 
     @GetMapping("/{diaryId}")
     @Operation(summary = "댓글 조회", description = "특정 게시글의 댓글 페이지네이션 조회, 본인 또는 친구의 일기의 댓글만 조회 가능. 댓글은 기본적으로 익명으로 표시됩니다.")
@@ -46,7 +48,7 @@ public class CommentController {
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<Void> saveComment(@RequestBody CommentRequest commentRequest, @PathVariable("diaryId") Long diaryId,
                                          @Parameter(hidden = true) @Login AuthenticateUser authenticateUser) {
-        commentService.saveComment(authenticateUser.getUserId(), diaryId, commentRequest);
+        commentFacade.saveComment(authenticateUser.getUserId(), diaryId, commentRequest);
         return ApiResponse.of(HttpStatus.OK, "저장되었습니다.");
     }
 

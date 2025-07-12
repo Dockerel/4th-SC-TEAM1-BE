@@ -25,7 +25,6 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
 
 @Service
 @Transactional(readOnly = true)
@@ -73,10 +72,6 @@ public class PointService {
 
     @Transactional
     public void earnAttendancePointPerDay(Member member) {
-        String lockKey = LOCK_PREFIX + member.getId();
-
-        Lock lock = lockWithMemberFactory.tryLock(member, lockKey, 10, 2);
-
         Point point = getPoint(member);
 
         Instant startOfDay = Instant.now().atZone(ZoneId.systemDefault()).truncatedTo(ChronoUnit.DAYS).toInstant();
@@ -90,8 +85,6 @@ public class PointService {
             pointLogService.createPointLog(new PointLogRequest(member, totalPoints, attendanceType, PointStatus.EARNED, LocalDateTime.now()));
             point.earnPoint(totalPoints);
         }
-
-        lockWithMemberFactory.unlock(member, lock);
     }
 
     private int calculateConsecutiveAttendanceDays(Member member) {
@@ -135,10 +128,6 @@ public class PointService {
 
     @Transactional
     public void earnPointByType(PointRequest pointRequest) {
-        String lockKey = LOCK_PREFIX + pointRequest.member().getId();
-
-        Lock lock = lockWithMemberFactory.tryLock(pointRequest.member(), lockKey, 10, 2);
-
         Point point = getPoint(pointRequest.member());
 
         Instant startOfDay = Instant.now().atZone(ZoneId.systemDefault()).truncatedTo(ChronoUnit.DAYS).toInstant();
@@ -150,8 +139,6 @@ public class PointService {
             point.earnPoint(pointByType);
             pointLogService.createPointLog(new PointLogRequest(pointRequest.member(), pointByType, pointRequest.pointType(), PointStatus.EARNED, LocalDateTime.now()));
         }
-
-        lockWithMemberFactory.unlock(pointRequest.member(), lock);
     }
 
     private int getPointByType(PointType pointType) {
@@ -164,34 +151,22 @@ public class PointService {
 
     @Transactional
     public void consumePointByGrowthButton(Member member, GrowthButton growthButton) {
-        String lockKey = LOCK_PREFIX + member.getId();
-
-        Lock lock = lockWithMemberFactory.tryLock(member, lockKey, 10, 2);
-
         Point point = getPoint(member);
         PointType pointType = point.convertPointTypeByGrowthButton(growthButton);
 
         int consumedPoint = point.consumePointByGrowthButton(growthButton);
 
         pointLogService.createPointLog(new PointLogRequest(member, consumedPoint, pointType, PointStatus.CONSUMED, LocalDateTime.now()));
-
-        lockWithMemberFactory.unlock(member, lock);
     }
 
     @Transactional
     public void consumePointToGetCommentWriterId(Member member) {
-        String lockKey = LOCK_PREFIX + member.getId();
-
-        Lock lock = lockWithMemberFactory.tryLock(member, lockKey, 10, 2);
-
         Point point = getPoint(member);
         PointType pointType = PointType.GET_COMMENT_WRITER_ID;
-        
+
         int consumedPoint = point.consumePointToGetCommentWriterId(GET_COMMENT_WRITER_ID_POINT);
 
         pointLogService.createPointLog(new PointLogRequest(member, consumedPoint, pointType, PointStatus.CONSUMED, LocalDateTime.now()));
-
-        lockWithMemberFactory.unlock(member, lock);
     }
 
     private Point getPoint(Member member) {
