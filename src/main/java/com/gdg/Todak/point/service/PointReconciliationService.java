@@ -26,7 +26,7 @@ public class PointReconciliationService {
 
     @Transactional
     public void reconcilePoint(Long memberId) {
-        int calculatedTotalPoint = pointLogRepository.sumPointsByMemberId(memberId);
+        int calculatedTotalPoint = pointLogRepository.sumPointsByMemberId(memberId).orElse(0);
 
         Point findPoint = pointRepository.findByMemberId(memberId);
         int currentPoint = findPoint.getPoint();

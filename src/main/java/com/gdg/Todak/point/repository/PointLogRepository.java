@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PointLogRepository extends JpaRepository<PointLog, Long> {
@@ -37,6 +38,11 @@ public interface PointLogRepository extends JpaRepository<PointLog, Long> {
     @Query("SELECT DISTINCT pl.member.id FROM PointLog pl WHERE pl.createdAt BETWEEN :start AND :end")
     List<Long> findMemberIdsWithActivityBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
-    @Query("SELECT SUM(pl.point) FROM PointLog pl WHERE pl.member.id = :memberId")
-    int sumPointsByMemberId(@Param("memberId") Long memberId);
+    @Query("""
+                SELECT COALESCE(SUM(CASE WHEN pl.pointStatus = 'EARNED' THEN pl.point ELSE 0 END), 0) - 
+                       COALESCE(SUM(CASE WHEN pl.pointStatus = 'CONSUMED' THEN pl.point ELSE 0 END), 0)
+                FROM PointLog pl
+                WHERE pl.member.id = :memberId
+            """)
+    Optional<Integer> sumPointsByMemberId(@Param("memberId") Long memberId);
 }
