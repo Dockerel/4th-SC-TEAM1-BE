@@ -17,6 +17,7 @@ import com.gdg.Todak.point.repository.PointRepository;
 import com.gdg.Todak.tree.domain.GrowthButton;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -149,7 +150,7 @@ public class PointService {
         };
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void consumePointByGrowthButton(Member member, GrowthButton growthButton) {
         Point point = getPoint(member);
         PointType pointType = point.convertPointTypeByGrowthButton(growthButton);

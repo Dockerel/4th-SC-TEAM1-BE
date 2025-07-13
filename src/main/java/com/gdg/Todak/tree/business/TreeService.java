@@ -4,7 +4,7 @@ import com.gdg.Todak.friend.service.FriendCheckService;
 import com.gdg.Todak.member.domain.Member;
 import com.gdg.Todak.member.repository.MemberRepository;
 import com.gdg.Todak.point.exception.NotFoundException;
-import com.gdg.Todak.point.service.PointService;
+import com.gdg.Todak.point.facade.PointFacade;
 import com.gdg.Todak.tree.business.dto.TreeInfoResponse;
 import com.gdg.Todak.tree.domain.GrowthButton;
 import com.gdg.Todak.tree.domain.Tree;
@@ -23,7 +23,7 @@ public class TreeService {
 
     private final TreeRepository treeRepository;
     private final MemberRepository memberRepository;
-    private final PointService pointService;
+    private final PointFacade pointFacade;
     private final FriendCheckService friendCheckService;
 
     @Transactional
@@ -45,7 +45,7 @@ public class TreeService {
             throw new BadRequestException("최고 레벨입니다.");
         }
 
-        pointService.consumePointByGrowthButton(member, growthButton);
+        pointFacade.consumePointByGrowthButton(member, growthButton);
         tree.earnExperience(growthButton);
 
         treeRepository.update(member, tree.toTreeEntityUpdateRequest());
