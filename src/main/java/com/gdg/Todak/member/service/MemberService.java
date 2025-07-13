@@ -1,5 +1,6 @@
 package com.gdg.Todak.member.service;
 
+import com.gdg.Todak.event.event.LoginEvent;
 import com.gdg.Todak.member.controller.dto.LoginForm;
 import com.gdg.Todak.member.controller.request.ProfileRequest;
 import com.gdg.Todak.member.domain.AuthenticateUser;
@@ -19,6 +20,7 @@ import com.gdg.Todak.point.service.PointService;
 import com.gdg.Todak.tree.business.TreeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,14 +46,15 @@ public class MemberService {
     private final RedisTemplate redisTemplate;
     private final PointService pointService;
     private final TreeService treeService;
+    private final ApplicationEventPublisher eventPublisher;
 
     private static final List<String> ALLOWED_MIME_TYPES = Arrays.asList(
-        "image/jpeg",   // JPG 이미지
-        "image/png",    // PNG 이미지
-        "image/gif",    // GIF 이미지
-        "image/bmp",    // BMP 이미지
-        "image/webp",   // WEBP 이미지
-        "image/svg+xml" // SVG 이미지
+            "image/jpeg",   // JPG 이미지
+            "image/png",    // PNG 이미지
+            "image/gif",    // GIF 이미지
+            "image/bmp",    // BMP 이미지
+            "image/webp",   // WEBP 이미지
+            "image/svg+xml" // SVG 이미지
     );
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
 
@@ -79,7 +82,7 @@ public class MemberService {
         String encodedPassword = PasswordEncoder.getEncodedPassword(salt, request.getPassword());
 
         Member member = memberRepository.save(
-            Member.of(request.getUserId(), encodedPassword, request.getNickname(), defaultProfileImageUrl, salt));
+                Member.of(request.getUserId(), encodedPassword, request.getNickname(), defaultProfileImageUrl, salt));
 
         MemberRole role = MemberRole.of(Role.USER, member);
         member.addRole(role);
@@ -109,7 +112,7 @@ public class MemberService {
 
         saveRefreshToken(refreshToken, member);
 
-        pointService.earnAttendancePointPerDay(member);
+        eventPublisher.publishEvent(LoginEvent.of(member));
 
         return LoginResponse.of(member.getUserId(), member.getNickname(), accessToken, refreshToken);
     }
@@ -232,8 +235,7 @@ public class MemberService {
         }
 
         Member member = findMemberOptional.get();
-        String encodedPassword = PasswordEncoder.getEncodedPassword(member.getSalt(),
-            request.getPassword());
+        String encodedPassword = PasswordEncoder.getEncodedPassword(member.getSalt(), request.getPassword());
         if (!encodedPassword.equals(member.getPassword())) {
             return null;
         }
@@ -262,12 +264,11 @@ public class MemberService {
 
     private Member findMember(String userId) {
         return memberRepository.findByUserId(userId)
-            .orElseThrow(() -> new UnauthorizedException("멤버가 존재하지 않습니다."));
+                .orElseThrow(() -> new UnauthorizedException("멤버가 존재하지 않습니다."));
     }
 
     private static void checkPassword(String password, Member member) {
-        String encodedPassword = PasswordEncoder.getEncodedPassword(member.getSalt(),
-            password);
+        String encodedPassword = PasswordEncoder.getEncodedPassword(member.getSalt(), password);
         if (!encodedPassword.equals(member.getPassword())) {
             throw new UnauthorizedException("비밀번호가 올바르지 않습니다.");
         }

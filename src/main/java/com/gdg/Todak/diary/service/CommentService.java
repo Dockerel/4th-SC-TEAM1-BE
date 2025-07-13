@@ -19,7 +19,7 @@ import com.gdg.Todak.diary.util.MBTISelector;
 import com.gdg.Todak.friend.service.FriendCheckService;
 import com.gdg.Todak.member.domain.Member;
 import com.gdg.Todak.member.repository.MemberRepository;
-import com.gdg.Todak.point.service.PointService;
+import com.gdg.Todak.point.facade.PointFacade;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import jakarta.annotation.PostConstruct;
@@ -48,7 +48,7 @@ public class CommentService {
     private final DiaryRepository diaryRepository;
     private final CommentAnonymousRevealRepository commentAnonymousRevealRepository;
     private final FriendCheckService friendCheckService;
-    private final PointService pointService;
+    private final PointFacade pointFacade;
     private final MBTISelector mbtiSelector;
     private final AiModelConfig aiModelConfig;
     private final ObjectMapper objectMapper;
@@ -165,7 +165,7 @@ public class CommentService {
             throw new BadRequestException("본인이 작성한 댓글은 익명 해제가 필요하지 않습니다.");
         }
 
-        pointService.consumePointToGetCommentWriterId(member);
+        pointFacade.consumePointToGetCommentWriterId(member);
 
         commentAnonymousRevealRepository.save(CommentAnonymousReveal.of(member, comment));
 
