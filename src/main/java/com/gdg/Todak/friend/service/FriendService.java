@@ -12,7 +12,6 @@ import com.gdg.Todak.member.repository.MemberRepository;
 import com.gdg.Todak.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -27,7 +26,7 @@ public class FriendService {
     private final MemberRepository memberRepository;
     private final NotificationService notificationService;
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional
     public Friend makeFriendRequest(String userId, FriendIdRequest friendIdRequest) {
         Member requesterMember = getMember(userId);
         Member accepterMember = memberRepository.findByUserId(friendIdRequest.friendId())

@@ -5,10 +5,9 @@ import com.gdg.Todak.event.event.NewCommentEvent;
 import com.gdg.Todak.notification.dto.PublishNotificationRequest;
 import com.gdg.Todak.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.time.Instant;
 
@@ -20,7 +19,7 @@ public class NewCommentNotificationListener {
     private final NotificationService notificationService;
 
     @Async
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @EventListener
     public void handleCommentSaved(NewCommentEvent event) {
         Comment comment = event.getComment();
         String senderId = comment.getMember().getUserId();

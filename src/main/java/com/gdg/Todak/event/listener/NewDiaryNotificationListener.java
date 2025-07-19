@@ -8,10 +8,9 @@ import com.gdg.Todak.friend.repository.FriendRepository;
 import com.gdg.Todak.notification.dto.PublishNotificationRequest;
 import com.gdg.Todak.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.List;
 
@@ -23,7 +22,7 @@ public class NewDiaryNotificationListener {
     private final FriendRepository friendRepository;
 
     @Async
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @EventListener
     public void handleDiarySaved(NewDiaryEvent event) {
         Diary diary = event.getDiary();
         String senderId = diary.getMember().getUserId();

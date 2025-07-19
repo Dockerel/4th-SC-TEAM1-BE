@@ -1,6 +1,5 @@
 package com.gdg.Todak.event.event;
 
-import com.gdg.Todak.friend.entity.Friend;
 import com.gdg.Todak.member.domain.Member;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
