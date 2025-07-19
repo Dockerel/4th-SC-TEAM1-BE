@@ -109,7 +109,7 @@ public class CommentService {
         return commentAnonymousRevealRepository.existsByMemberAndComment(member, comment);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional
     public Comment saveComment(String userId, Long diaryId, CommentRequest commentRequest) {
         Member member = getMember(userId);
         Diary diary = getDiary(diaryId);

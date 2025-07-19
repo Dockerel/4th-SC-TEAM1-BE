@@ -11,7 +11,6 @@ import com.gdg.Todak.member.domain.Member;
 import com.gdg.Todak.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -30,7 +29,7 @@ public class DiaryService {
     private final ImageService imageService;
     private final FriendCheckService friendCheckService;
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional
     public Diary writeDiary(String userId, DiaryRequest diaryRequest) {
         Member member = getMember(userId);
 
