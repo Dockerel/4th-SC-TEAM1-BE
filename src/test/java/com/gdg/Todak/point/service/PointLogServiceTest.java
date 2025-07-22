@@ -7,6 +7,7 @@ import com.gdg.Todak.point.PointStatus;
 import com.gdg.Todak.point.PointType;
 import com.gdg.Todak.point.dto.PointLogRequest;
 import com.gdg.Todak.point.dto.PointLogResponse;
+import com.gdg.Todak.point.dto.PointLogSearchRequest;
 import com.gdg.Todak.point.entity.PointLog;
 import com.gdg.Todak.point.repository.PointLogRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -122,7 +123,7 @@ class PointLogServiceTest {
         pointLogRepository.save(PointLog.builder().member(testMember).point(100).pointType(PointType.DIARY).pointStatus(PointStatus.EARNED).build());
 
         // when
-        Page<PointLogResponse> pointLogs = pointLogService.getPointLogList(testMember.getUserId(), Pageable.unpaged());
+        Page<PointLogResponse> pointLogs = pointLogService.getPointLogList(testMember.getUserId(), new PointLogSearchRequest(), Pageable.unpaged());
 
         // then
         assertThat(pointLogs).isNotEmpty();

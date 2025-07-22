@@ -3,6 +3,7 @@ package com.gdg.Todak.diary.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gdg.Todak.diary.dto.CommentRequest;
 import com.gdg.Todak.diary.dto.CommentResponse;
+import com.gdg.Todak.diary.facade.CommentFacade;
 import com.gdg.Todak.diary.service.CommentService;
 import com.gdg.Todak.member.Interceptor.AdminLoginCheckInterceptor;
 import com.gdg.Todak.member.Interceptor.LoginCheckInterceptor;
@@ -37,6 +38,9 @@ class CommentControllerTest {
     private final String token = "testToken";
 
     @MockitoBean
+    private CommentFacade commentFacade;
+
+    @MockitoBean
     private CommentService commentService;
 
     @Autowired
@@ -67,7 +71,7 @@ class CommentControllerTest {
     void saveCommentTest() throws Exception {
         // given
         CommentRequest commentRequest = new CommentRequest("테스트 댓글");
-        doNothing().when(commentService).saveComment(anyString(), any(), any(CommentRequest.class));
+        doNothing().when(commentFacade).saveComment(anyString(), any(), any(CommentRequest.class));
 
         // when
         mockMvc.perform(post("/api/v1/comments/1")
