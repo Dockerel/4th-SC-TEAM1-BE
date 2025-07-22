@@ -1,5 +1,9 @@
 package com.gdg.Todak.point.scheduler;
 
+import com.gdg.Todak.common.lock.LockExecutor;
+import com.gdg.Todak.member.domain.Member;
+import com.gdg.Todak.member.exception.UnauthorizedException;
+import com.gdg.Todak.member.repository.MemberRepository;
 import com.gdg.Todak.point.service.PointReconciliationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +19,11 @@ import java.util.List;
 @Service
 public class PointReconciliationScheduler {
 
+    private final static String LOCK_PREFIX = "pointLock:";
+
+    private final LockExecutor lockExecutor;
     private final PointReconciliationService pointReconciliationService;
+    private final MemberRepository memberRepository;
 
     @Scheduled(cron = "0 0 4 * * *")
     public void reconcilePoints() {
@@ -25,14 +33,30 @@ public class PointReconciliationScheduler {
         LocalDateTime end = start.plusDays(1).minusNanos(1);
 
         List<Long> memberIds = pointReconciliationService.getTargetMembers(start, end);
-        for (Long memberId : memberIds) {
-            try {
-                pointReconciliationService.reconcilePoint(memberId);
-            } catch (Exception e) {
-                log.error("포인트 보정 중 오류 발생 | Member ID: {}", memberId, e);
-            }
-        }
+        memberIds.forEach(memberId -> reconcilePointWithLock(memberId));
 
         log.info("포인트 정합성 보정 작업 완료");
+    }
+
+    private void reconcilePointWithLock(Long memberId) {
+        Member member = findMember(memberId);
+        lockExecutor.executeWithLock(
+                LOCK_PREFIX,
+                member,
+                () -> reconcilePoint(memberId)
+        );
+    }
+
+    private void reconcilePoint(Long memberId) {
+        try {
+            pointReconciliationService.reconcilePoint(memberId);
+        } catch (Exception e) {
+            log.error("포인트 보정 중 오류 발생 | Member ID: {}", memberId, e);
+        }
+    }
+
+    private Member findMember(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new UnauthorizedException("멤버가 존재하지 않습니다."));
     }
 }
