@@ -99,7 +99,7 @@ public class MemberService {
     @Transactional
     public LoginResponse login(LoginServiceRequest request) {
 
-        Member member = findMember(request.getUserId());
+        Member member = findMemberByUserId(request.getUserId());
 
         checkPassword(request.getPassword(), member);
 
@@ -119,7 +119,7 @@ public class MemberService {
 
     public LogoutResponse logout(AuthenticateUser user) {
         if (user != null) {
-            Member member = findMember(user.getUserId());
+            Member member = findMemberByUserId(user.getUserId());
             redisTemplate.delete(member.getId());
         }
 
@@ -129,13 +129,13 @@ public class MemberService {
     }
 
     public MeResponse me(AuthenticateUser user) {
-        Member member = findMember(user.getUserId());
+        Member member = findMemberByUserId(user.getUserId());
         return MeResponse.from(member);
     }
 
     @Transactional
     public MeResponse editMemberNickname(AuthenticateUser user, EditMemberNicknameServiceRequest serviceRequest) {
-        Member member = findMember(user.getUserId());
+        Member member = findMemberByUserId(user.getUserId());
         member.setNickname(serviceRequest.getNickname());
         return MeResponse.of(member.getUserId(), member.getNickname(), member.getImageUrl());
     }
@@ -163,7 +163,7 @@ public class MemberService {
         File destinationFile = new File(uploadDestination);
 
         try {
-            Member member = findMember(user.getUserId());
+            Member member = findMemberByUserId(user.getUserId());
             if (!member.getImageUrl().equals(defaultProfileImageUrl)) {
                 deleteAllImagesInFolder(uploadFolder + subDirectory);
             }
@@ -178,7 +178,7 @@ public class MemberService {
 
     @Transactional
     public String deleteMemberProfileImage(AuthenticateUser user) {
-        Member member = findMember(user.getUserId());
+        Member member = findMemberByUserId(user.getUserId());
         deleteAllImagesInFolder(uploadFolder + user.getUserId() + "/profile_image");
         member.updateImageUrl(defaultProfileImageUrl);
         return "프로필 이미지가 삭제되고 기본 이미지로 변경되었습니다.";
@@ -203,7 +203,7 @@ public class MemberService {
 
     @Transactional
     public String changePassword(AuthenticateUser user, ChangePasswordServiceRequest request) {
-        Member member = findMember(user.getUserId());
+        Member member = findMemberByUserId(user.getUserId());
 
         checkPassword(request.getOldPassword(), member);
 
@@ -222,7 +222,7 @@ public class MemberService {
 
     @Transactional
     public String deleteMember(AuthenticateUser user) {
-        Member member = findMember(user.getUserId());
+        Member member = findMemberByUserId(user.getUserId());
         memberRepository.delete(member);
         return "회원이 삭제되었습니다.";
     }
@@ -250,19 +250,24 @@ public class MemberService {
 
     @Transactional
     public String enableAiComment(AuthenticateUser user) {
-        Member member = findMember(user.getUserId());
+        Member member = findMemberByUserId(user.getUserId());
         member.enableAiComment();
         return "AI 댓글 기능이 활성화되었습니다.";
     }
 
     @Transactional
     public String disableAiComment(AuthenticateUser user) {
-        Member member = findMember(user.getUserId());
+        Member member = findMemberByUserId(user.getUserId());
         member.disableAiComment();
         return "AI 댓글 기능이 비활성화되었습니다.";
     }
 
-    private Member findMember(String userId) {
+    public Member findMemberById(Long id) {
+        return memberRepository.findById(id)
+                .orElseThrow(() -> new UnauthorizedException("멤버가 존재하지 않습니다."));
+    }
+
+    public Member findMemberByUserId(String userId) {
         return memberRepository.findByUserId(userId)
                 .orElseThrow(() -> new UnauthorizedException("멤버가 존재하지 않습니다."));
     }

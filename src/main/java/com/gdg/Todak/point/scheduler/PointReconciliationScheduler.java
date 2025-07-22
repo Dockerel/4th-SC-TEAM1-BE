@@ -2,8 +2,7 @@ package com.gdg.Todak.point.scheduler;
 
 import com.gdg.Todak.common.lock.LockExecutor;
 import com.gdg.Todak.member.domain.Member;
-import com.gdg.Todak.member.exception.UnauthorizedException;
-import com.gdg.Todak.member.repository.MemberRepository;
+import com.gdg.Todak.member.service.MemberService;
 import com.gdg.Todak.point.service.PointReconciliationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +22,7 @@ public class PointReconciliationScheduler {
 
     private final LockExecutor lockExecutor;
     private final PointReconciliationService pointReconciliationService;
-    private final MemberRepository memberRepository;
+    private final MemberService memberService;
 
     @Scheduled(cron = "0 0 4 * * *")
     public void reconcilePoints() {
@@ -39,7 +38,7 @@ public class PointReconciliationScheduler {
     }
 
     private void reconcilePointWithLock(Long memberId) {
-        Member member = findMember(memberId);
+        Member member = memberService.findMemberById(memberId);
         lockExecutor.executeWithLock(
                 LOCK_PREFIX,
                 member,
@@ -53,10 +52,5 @@ public class PointReconciliationScheduler {
         } catch (Exception e) {
             log.error("포인트 보정 중 오류 발생 | Member ID: {}", memberId, e);
         }
-    }
-
-    private Member findMember(Long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new UnauthorizedException("멤버가 존재하지 않습니다."));
     }
 }
