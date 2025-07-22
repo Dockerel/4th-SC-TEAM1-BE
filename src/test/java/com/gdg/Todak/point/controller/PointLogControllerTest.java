@@ -37,13 +37,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(PointController.class)
-class PointControllerTest {
+@WebMvcTest(PointLogController.class)
+class PointLogControllerTest {
 
     private final String token = "testToken";
 
     @MockitoBean
-    private PointService pointService;
+    private PointLogService pointLogService;
 
     @Autowired
     private MockMvc mockMvc;
@@ -69,24 +69,24 @@ class PointControllerTest {
     }
 
     @Test
-    @DisplayName("포인트 조회 테스트")
-    void getMemberPointTest() throws Exception {
+    @DisplayName("포인트 로그 조회 테스트")
+    void getPointLogTest() throws Exception {
         // given
-        String userId = "testUser";
-        AuthenticateUser authenticateUser = new AuthenticateUser(userId, Set.of(Role.USER));
+        PointLogResponse pointLogResponse1 = new PointLogResponse(PointType.ATTENDANCE_DAY_1, PointStatus.EARNED, LocalDateTime.now(), 10);
+        PointLogResponse pointLogResponse2 = new PointLogResponse(PointType.DIARY, PointStatus.EARNED, LocalDateTime.now(), 15);
 
-        when(loginMemberArgumentResolver.supportsParameter(any())).thenReturn(true);
-        when(loginMemberArgumentResolver.resolveArgument(any(), any(), any(), any())).thenReturn(authenticateUser);
+        Page<PointLogResponse> pointLogPage = new PageImpl<>(List.of(pointLogResponse1, pointLogResponse2), PageRequest.of(0, 10), 2);
 
-        PointResponse pointResponse = new PointResponse(100);
-        when(pointService.getPoint(anyString())).thenReturn(pointResponse);
+        when(pointLogService.getPointLogList(anyString(), any(PointLogSearchRequest.class) ,any(Pageable.class)))
+                .thenReturn(pointLogPage);
 
         // when
-        mockMvc.perform(get("/api/v1/points")
+        mockMvc.perform(get("/api/v1/points/logs")
                         .header("Authorization", "Bearer " + token))
 
                 // then
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.point").value(100));
+                .andExpect(jsonPath("$.status").value("OK"))
+                .andExpect(jsonPath("$.message").value("OK"));
     }
 }

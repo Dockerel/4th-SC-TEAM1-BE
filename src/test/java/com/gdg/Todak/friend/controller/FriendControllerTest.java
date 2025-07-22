@@ -3,6 +3,7 @@ package com.gdg.Todak.friend.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gdg.Todak.friend.FriendStatus;
 import com.gdg.Todak.friend.dto.*;
+import com.gdg.Todak.friend.facade.FriendFacade;
 import com.gdg.Todak.friend.service.FriendService;
 import com.gdg.Todak.member.Interceptor.AdminLoginCheckInterceptor;
 import com.gdg.Todak.member.Interceptor.LoginCheckInterceptor;
@@ -35,6 +36,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class FriendControllerTest {
 
     private final String token = "testToken";
+    @MockitoBean
+    FriendFacade friendFacade;
     @MockitoBean
     MemberService memberService;
     @Autowired
@@ -70,7 +73,7 @@ class FriendControllerTest {
     void sendFriendRequestTest() throws Exception {
         // given
         FriendIdRequest request = new FriendIdRequest("friendId");
-        doNothing().when(friendService).makeFriendRequest(anyString(), any(FriendIdRequest.class));
+        doNothing().when(friendFacade).makeFriendRequest(anyString(), any(FriendIdRequest.class));
 
         // when & then
         mockMvc.perform(post("/api/v1/friends")

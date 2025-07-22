@@ -6,6 +6,7 @@ import com.gdg.Todak.diary.dto.DiaryDetailResponse;
 import com.gdg.Todak.diary.dto.DiaryRequest;
 import com.gdg.Todak.diary.dto.DiarySummaryResponse;
 import com.gdg.Todak.diary.dto.DiaryUpdateRequest;
+import com.gdg.Todak.diary.facade.DiaryFacade;
 import com.gdg.Todak.diary.service.DiaryService;
 import com.gdg.Todak.member.Interceptor.AdminLoginCheckInterceptor;
 import com.gdg.Todak.member.Interceptor.LoginCheckInterceptor;
@@ -41,6 +42,9 @@ class DiaryControllerTest {
 
     private final String token = "testToken";
     private final String storageUUID = "testUUID";
+
+    @MockitoBean
+    private DiaryFacade diaryFacade;
 
     @MockitoBean
     private DiaryService diaryService;
@@ -79,7 +83,7 @@ class DiaryControllerTest {
     void writeDiaryTest() throws Exception {
         // given
         DiaryRequest request = new DiaryRequest("오늘은 좋은 하루였다.", Emotion.HAPPY, storageUUID);
-        doNothing().when(diaryService).writeDiary(anyString(), any(DiaryRequest.class));
+        doNothing().when(diaryFacade).writeDiary(anyString(), any(DiaryRequest.class));
 
         // when
         mockMvc.perform(post("/api/v1/diaries")

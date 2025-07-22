@@ -3,6 +3,7 @@ package com.gdg.Todak.tree.business;
 import com.gdg.Todak.member.domain.Member;
 import com.gdg.Todak.member.repository.MemberRepository;
 import com.gdg.Todak.point.exception.NotFoundException;
+import com.gdg.Todak.point.facade.PointFacade;
 import com.gdg.Todak.point.service.PointService;
 import com.gdg.Todak.tree.business.dto.TreeEntityDto;
 import com.gdg.Todak.tree.business.dto.TreeInfoResponse;
@@ -36,6 +37,9 @@ class TreeServiceTest {
 
     @Mock
     private PointService pointService;
+
+    @Mock
+    private PointFacade pointFacade;
 
     @InjectMocks
     private TreeService treeService;
@@ -88,7 +92,7 @@ class TreeServiceTest {
         // given
         given(memberRepository.findByUserId(anyString())).willReturn(Optional.of(testMember));
         given(treeRepository.findByMember(any(Member.class))).willReturn(treeEntityDto);
-        doNothing().when(pointService).consumePointByGrowthButton(any(Member.class), any(GrowthButton.class));
+        doNothing().when(pointFacade).consumePointByGrowthButton(any(Member.class), any(GrowthButton.class));
         doNothing().when(treeRepository).update(any(Member.class), any());
 
         // when
@@ -96,7 +100,7 @@ class TreeServiceTest {
 
         // then
         assertThat(result).isEqualTo("정상적으로 경험치를 획득하였습니다.");
-        verify(pointService, times(1)).consumePointByGrowthButton(testMember, GrowthButton.WATER);
+        verify(pointFacade, times(1)).consumePointByGrowthButton(testMember, GrowthButton.WATER);
         verify(treeRepository, times(1)).update(eq(testMember), any());
     }
 
@@ -106,7 +110,7 @@ class TreeServiceTest {
         // given
         given(memberRepository.findByUserId(anyString())).willReturn(Optional.of(testMember));
         given(treeRepository.findByMember(any(Member.class))).willReturn(treeEntityDto);
-        doNothing().when(pointService).consumePointByGrowthButton(any(Member.class), any(GrowthButton.class));
+        doNothing().when(pointFacade).consumePointByGrowthButton(any(Member.class), any(GrowthButton.class));
         doNothing().when(treeRepository).update(any(Member.class), any());
 
         // when
@@ -114,7 +118,7 @@ class TreeServiceTest {
 
         // then
         assertThat(result).isEqualTo("정상적으로 경험치를 획득하였습니다.");
-        verify(pointService, times(1)).consumePointByGrowthButton(testMember, GrowthButton.SUN);
+        verify(pointFacade, times(1)).consumePointByGrowthButton(testMember, GrowthButton.SUN);
         verify(treeRepository, times(1)).update(eq(testMember), any());
     }
 
@@ -124,7 +128,7 @@ class TreeServiceTest {
         // given
         given(memberRepository.findByUserId(anyString())).willReturn(Optional.of(testMember));
         given(treeRepository.findByMember(any(Member.class))).willReturn(treeEntityDto);
-        doNothing().when(pointService).consumePointByGrowthButton(any(Member.class), any(GrowthButton.class));
+        doNothing().when(pointFacade).consumePointByGrowthButton(any(Member.class), any(GrowthButton.class));
         doNothing().when(treeRepository).update(any(Member.class), any());
 
         // when
@@ -132,7 +136,7 @@ class TreeServiceTest {
 
         // then
         assertThat(result).isEqualTo("정상적으로 경험치를 획득하였습니다.");
-        verify(pointService, times(1)).consumePointByGrowthButton(testMember, GrowthButton.NUTRIENT);
+        verify(pointFacade, times(1)).consumePointByGrowthButton(testMember, GrowthButton.NUTRIENT);
         verify(treeRepository, times(1)).update(eq(testMember), any());
     }
 
