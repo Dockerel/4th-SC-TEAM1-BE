@@ -71,7 +71,7 @@ public class PointLogService {
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {
-                savePointLogToServer(pointLogRequest);
+//                savePointLogToServer(pointLogRequest);
             }
         });
     }

@@ -20,4 +20,8 @@ public class SignupServiceRequest {
         this.passwordCheck = passwordCheck;
         this.nickname = nickname;
     }
+
+    public static SignupServiceRequest of(String userId, String password, String passwordCheck, String nickname) {
+        return new SignupServiceRequest(userId, password, passwordCheck, nickname);
+    }
 }

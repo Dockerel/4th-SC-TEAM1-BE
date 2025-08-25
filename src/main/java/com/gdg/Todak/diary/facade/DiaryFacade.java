@@ -15,8 +15,9 @@ public class DiaryFacade {
     private final DiaryService diaryService;
     private final ApplicationEventPublisher eventPublisher;
 
-    public void writeDiary(String userId, DiaryRequest diaryRequest) {
+    public Long writeDiary(String userId, DiaryRequest diaryRequest) {
         Diary diary = diaryService.writeDiary(userId, diaryRequest);
         eventPublisher.publishEvent(NewDiaryEvent.of(diary));
+        return diary.getId();
     }
 }
