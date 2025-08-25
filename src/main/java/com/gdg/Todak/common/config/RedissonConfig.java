@@ -25,7 +25,6 @@ public class RedissonConfig {
 
         config.useSingleServer()
                 .setAddress("redis://" + host + ":" + port)
-                .setPassword(password)
                 .setConnectionPoolSize(10)
                 .setConnectionMinimumIdleSize(1);
 

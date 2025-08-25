@@ -1,6 +1,7 @@
 package com.gdg.Todak.common.config;
 
 import com.gdg.Todak.common.filter.AuthenticationExceptionHandlingFilter;
+import com.gdg.Todak.common.interceptor.QueryCountInterceptor;
 import com.gdg.Todak.member.Interceptor.AdminLoginCheckInterceptor;
 import com.gdg.Todak.member.Interceptor.LoginCheckInterceptor;
 import com.gdg.Todak.member.resolver.LoginMemberArgumentResolver;
@@ -35,12 +36,14 @@ public class WebConfig implements WebMvcConfigurer {
 
     private final LoginCheckInterceptor loginCheckInterceptor;
     private final AdminLoginCheckInterceptor adminLoginCheckInterceptor;
+    private final QueryCountInterceptor queryCountInterceptor;
 
     private final LoginMemberArgumentResolver loginMemberArgumentResolver;
 
     private final AuthenticationExceptionHandlingFilter authenticationExceptionHandlingFilter;
 
     List<String> whiteList = List.of(
+            "/api/v1/study/**",
             "/api/v1/members/check-userId",
             "/api/v1/members/signup",
             "/api/v1/members/login",
@@ -90,13 +93,17 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(loginCheckInterceptor)
+        registry.addInterceptor(queryCountInterceptor)
                 .order(1)
+                .addPathPatterns("/**");
+
+        registry.addInterceptor(loginCheckInterceptor)
+                .order(2)
                 .addPathPatterns("/**")
                 .excludePathPatterns(whiteList);
 
         registry.addInterceptor(adminLoginCheckInterceptor)
-                .order(2)
+                .order(3)
                 .addPathPatterns("/**")
                 .excludePathPatterns(adminWhiteList);
     }

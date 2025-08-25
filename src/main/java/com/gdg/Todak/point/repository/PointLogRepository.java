@@ -36,7 +36,7 @@ public interface PointLogRepository extends JpaRepository<PointLog, Long> {
     Page<PointLog> findAll(Specification<PointLog> spec, Pageable pageable);
 
     @Query("SELECT DISTINCT pl.member.id FROM PointLog pl WHERE pl.createdAt BETWEEN :start AND :end")
-    List<Long> findMemberIdsWithActivityBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+    List<Long> findMemberIdsWithActivityBetween(@Param("start") Instant start, @Param("end") Instant end);
 
     @Query("""
                 SELECT COALESCE(SUM(CASE WHEN pl.pointStatus = 'EARNED' THEN pl.point ELSE 0 END), 0) - 

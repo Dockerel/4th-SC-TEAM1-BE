@@ -40,13 +40,6 @@ public class PointEarningListener {
     }
 
     @Async
-    @Retryable(
-            value = {
-                    LockException.class,
-                    DeadlockLoserDataAccessException.class
-            },
-            backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, random = true)
-    )
     @EventListener
     public void handleCommentSaved(NewCommentEvent event) {
         pointFacade.earnPointByType(PointRequest.of(event.getComment().getMember(), PointType.COMMENT));

@@ -209,4 +209,13 @@ class PointLogRepositoryTest {
         // then
         assertThat(findPointLogs).hasSize(1);
     }
+
+    @Test
+    void test() {
+        // given
+
+        // when
+
+        // then
+    }
 }

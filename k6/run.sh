@@ -1,0 +1,1 @@
+K6_WEB_DASHBOARD=true k6 run k6/k6-script.js

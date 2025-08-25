@@ -114,6 +114,7 @@ public class FriendService {
 
     @Transactional
     public void acceptFriendRequest(String userId, Long friendRequestId) {
+        System.out.println("userId, friendRequestId = " + userId + ", " + friendRequestId);
         Member member = getMember(userId);
 
         Friend friendRequest = friendRepository.findById(friendRequestId)
