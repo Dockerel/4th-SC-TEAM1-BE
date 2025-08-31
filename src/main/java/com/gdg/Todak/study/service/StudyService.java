@@ -12,6 +12,7 @@ import com.gdg.Todak.friend.repository.FriendRepository;
 import com.gdg.Todak.member.domain.Member;
 import com.gdg.Todak.member.service.MemberService;
 import com.gdg.Todak.notification.dto.PublishNotificationRequest;
+import com.gdg.Todak.notification.facade.NotificationFacade;
 import com.gdg.Todak.notification.service.NotificationService;
 import com.gdg.Todak.point.PointStatus;
 import com.gdg.Todak.point.PointType;
@@ -59,7 +60,7 @@ public class StudyService {
 
     private final MemberService memberService;
     private final DiaryRepository diaryRepository;
-    private final NotificationService notificationService;
+    private final NotificationFacade notificationFacade;
     private final FriendRepository friendRepository;
     private final SchedulerService schedulerService;
     private final PointRepository pointRepository;
@@ -99,7 +100,7 @@ public class StudyService {
         for (Friend friend : friends) {
             String receiverId = friend.getFriend(senderId).getUserId();
             PublishNotificationRequest request = PublishNotificationRequest.of(senderId, receiverId, "diary", diary.getId(), diary.getCreatedAt());
-            notificationService.publishNotification(request);
+            notificationFacade.publishNotification(request);
         }
 
         schedulerService.scheduleSavingCommentByAI(diary);
