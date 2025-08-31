@@ -74,7 +74,7 @@ public class NotificationService {
         });
     }
 
-    @Async
+    @Async(value = "steadyExecutor")
     @Transactional
     public void saveNotification(PublishNotificationRequest request) {
         Notification notification = Notification.from(request);

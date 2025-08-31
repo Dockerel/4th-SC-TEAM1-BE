@@ -23,4 +23,16 @@ public class AsyncConfig {
         executor.initialize();
         return executor;
     }
+
+    @Bean(name = "steadyExecutor")
+    public Executor steadyExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(50);      // 높은 기본 스레드 수로 일정한 처리량 유지
+        executor.setMaxPoolSize(60);       // 약간의 여유만 두기
+        executor.setQueueCapacity(500);    // 큰 대기열로 일시적 부하 흡수
+        executor.setThreadNamePrefix("Steady-");
+        executor.setKeepAliveSeconds(60);  // 추가 스레드의 유휴 시간 제한
+        executor.initialize();
+        return executor;
+    }
 }
