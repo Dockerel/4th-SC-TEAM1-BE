@@ -6,6 +6,7 @@ import com.gdg.Todak.friend.FriendStatus;
 import com.gdg.Todak.friend.entity.Friend;
 import com.gdg.Todak.friend.repository.FriendRepository;
 import com.gdg.Todak.notification.dto.PublishNotificationRequest;
+import com.gdg.Todak.notification.facade.NotificationFacade;
 import com.gdg.Todak.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
@@ -18,7 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class NewDiaryNotificationListener {
 
-    private final NotificationService notificationService;
+    private final NotificationFacade notificationFacade;
     private final FriendRepository friendRepository;
 
     @Async
@@ -35,7 +36,7 @@ public class NewDiaryNotificationListener {
         for (Friend friend : friends) {
             String receiverId = friend.getFriend(senderId).getUserId();
             PublishNotificationRequest request = PublishNotificationRequest.of(senderId, receiverId, "diary", diary.getId(), diary.getCreatedAt());
-            notificationService.publishNotification(request);
+            notificationFacade.publishNotification(request);
         }
     }
 }

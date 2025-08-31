@@ -3,6 +3,7 @@ package com.gdg.Todak.event.listener;
 import com.gdg.Todak.diary.entity.Comment;
 import com.gdg.Todak.event.event.NewCommentEvent;
 import com.gdg.Todak.notification.dto.PublishNotificationRequest;
+import com.gdg.Todak.notification.facade.NotificationFacade;
 import com.gdg.Todak.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
@@ -16,7 +17,7 @@ import java.time.Instant;
 @RequiredArgsConstructor
 public class NewCommentNotificationListener {
 
-    private final NotificationService notificationService;
+    private final NotificationFacade notificationFacade;
 
     @Async
     @EventListener
@@ -29,6 +30,6 @@ public class NewCommentNotificationListener {
 
         PublishNotificationRequest request = PublishNotificationRequest.of(senderId, receiverId, "comment", diaryId, createdAt);
 
-        notificationService.publishNotification(request);
+        notificationFacade.publishNotification(request);
     }
 }

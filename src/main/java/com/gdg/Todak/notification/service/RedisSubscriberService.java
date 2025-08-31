@@ -25,6 +25,7 @@ import java.util.concurrent.ScheduledExecutorService;
 @Service
 public class RedisSubscriberService {
 
+    public static final int RETRIES_COUNT = 5;
     private final RedisTemplate<String, String> redisTemplate;
     private final ObjectMapper objectMapper;
 
@@ -43,35 +44,14 @@ public class RedisSubscriberService {
      */
     public void onMessage(String channel, String message) {
         log.info("Received message from channel: [{}] at time: {} with message: {}", channel, Instant.now(), message);
-        processMessage(message, 5);
+        processMessage(message);
     }
 
-    private void processMessage(String key, int retries) {
+    private void processMessage(String message) {
         scheduledExecutorService.submit(() -> {
             try {
-                String notificationString = null;
-                for (int attempt = 1; attempt <= retries; attempt++) {
-                    notificationString = (String) redisTemplate.opsForValue().get(key);
-                    if (notificationString != null) {
-                        break;
-                    }
-                    log.debug("Retrying to get key: {}. Attempt: {}", key, attempt);
-                    try {
-                        Thread.sleep(200);
-                    } catch (InterruptedException e) {
-                        log.error("InterruptedException during sleep", e);
-                        Thread.currentThread().interrupt();
-                        return;
-                    }
-                }
-
-                if (notificationString != null) {
-                    Notification notification = objectMapper.readValue(notificationString, Notification.class);
-                    log.info("Notification: {}", notification);
-                    sendNotificationToEmitters(notification);
-                } else {
-                    log.warn("No notification found in Redis for key: {} after maximum retries", key);
-                }
+                Notification notification = objectMapper.readValue(message, Notification.class);
+                sendNotificationToEmitters(notification);
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
@@ -82,24 +62,22 @@ public class RedisSubscriberService {
         String receiverUserId = notification.getReceiverUserId();
         List<SseEmitter> sseEmitters = emitters.get(receiverUserId);
 
-        if (sseEmitters != null && !sseEmitters.isEmpty()) {
-            List<SseEmitter> deadEmitters = new ArrayList<>();
+        if (sseEmitters == null || sseEmitters.isEmpty()) {
+            return;
+        }
 
-            for (SseEmitter emitter : sseEmitters) {
-                try {
-                    emitter.send(
-                            SseEmitter.event()
-                                    .name("notification")
-                                    .data(notification)
-                    );
-                    log.info("Sent SSE to user: {} with notification: {} at time: {}", receiverUserId, notification, Instant.now());
-                } catch (IOException e) {
-                    log.error("Error sending SSE to user: {} with message: {}", receiverUserId, e.getMessage());
-                    deadEmitters.add(emitter);
-                }
+        for (SseEmitter emitter : sseEmitters) {
+            try {
+                emitter.send(
+                        SseEmitter.event()
+                                .name("notification")
+                                .data(notification)
+                );
+                log.info("Sent SSE to user: {} with notification: {} at time: {}", receiverUserId, notification, Instant.now());
+            } catch (IOException e) {
+                log.error("Error sending SSE to user: {} with message: {}", receiverUserId, e.getMessage());
+                sseEmitters.remove(emitter);
             }
-        } else {
-            log.warn("No emitters found for user: {}", receiverUserId);
         }
     }
 

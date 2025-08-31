@@ -7,5 +7,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AckRequest {
 
-    private String notificationId;
+    private Long notificationId;
 }
