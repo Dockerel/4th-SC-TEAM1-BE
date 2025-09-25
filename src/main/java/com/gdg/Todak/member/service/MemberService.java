@@ -100,10 +100,9 @@ public class MemberService {
         return LoginResponse.of(accessToken, refreshToken);
     }
 
-    public LogoutResponse logout(AuthenticateUser user) {
-        if (user != null) {
-            Member member = findMemberByUserId(user.getUserId());
-            redisTemplate.delete(member.getId());
+    public LogoutResponse logout(String refreshToken) {
+        if (refreshToken != null) {
+            redisTemplate.delete(refreshToken);
         }
 
         String message = "성공적으로 로그아웃 되었습니다.";

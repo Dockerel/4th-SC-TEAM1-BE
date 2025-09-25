@@ -30,7 +30,7 @@ public class AuthController {
     @PostMapping("/reissue")
     @Operation(summary = "액세스 토큰 갱신", description = "리프레시 토큰이 유효하다면 액세스 토큰을 갱신한다.")
     public ApiResponse<UpdateAccessTokenResponse> updateAccessTokenToken(
-            @CookieValue(name = "refresh_token", required = false) String refreshToken,
+            @CookieValue(name = REFRESH_TOKEN, required = false) String refreshToken,
             HttpServletResponse response
     ) {
         Jwt jwt = authService.updateAccessToken(refreshToken);
