@@ -1,7 +1,7 @@
 package com.gdg.Todak.friend.repository;
 
-import com.gdg.Todak.friend.FriendStatus;
 import com.gdg.Todak.friend.entity.Friend;
+import com.gdg.Todak.friend.entity.FriendStatus;
 import com.gdg.Todak.member.domain.Member;
 import com.gdg.Todak.member.repository.MemberRepository;
 import org.junit.jupiter.api.DisplayName;

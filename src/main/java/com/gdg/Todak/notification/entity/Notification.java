@@ -1,5 +1,6 @@
 package com.gdg.Todak.notification.entity;
 
+import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.notification.dto.PublishNotificationRequest;
 import lombok.Builder;
 import lombok.Getter;
@@ -7,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.time.Instant;
+
+import static com.gdg.Todak.common.exception.errors.NotificationError.SENDER_AND_RECEIVER_SAME_ERROR;
 
 @Getter
 @ToString
@@ -43,7 +46,7 @@ public class Notification {
         String receiverId = request.getReceiverId();
 
         if (senderId == receiverId) {
-            throw new RuntimeException("Sender and Receiver can't be same");
+            throw new TodakException(SENDER_AND_RECEIVER_SAME_ERROR);
         }
     }
 }

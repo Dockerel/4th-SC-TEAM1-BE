@@ -1,5 +1,6 @@
 package com.gdg.Todak.point.service;
 
+import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.member.domain.Member;
 import com.gdg.Todak.member.repository.MemberRepository;
 import com.gdg.Todak.point.PointStatus;
@@ -8,7 +9,6 @@ import com.gdg.Todak.point.dto.PointLogRequest;
 import com.gdg.Todak.point.dto.PointLogResponse;
 import com.gdg.Todak.point.dto.PointLogSearchRequest;
 import com.gdg.Todak.point.entity.PointLog;
-import com.gdg.Todak.point.exception.FileException;
 import com.gdg.Todak.point.repository.PointLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +29,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+
+import static com.gdg.Todak.common.exception.errors.PointError.LOCK_ERROR_LOG_UPLOAD_ERROR;
+import static com.gdg.Todak.common.exception.errors.PointError.POINT_LOG_UPLOAD_ERROR;
 
 @Service
 @Transactional(readOnly = true)
@@ -99,7 +102,7 @@ public class PointLogService {
                     StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 
         } catch (IOException e) {
-            throw new FileException("포인트 로그 업로드를 실패했습니다.");
+            throw new TodakException(POINT_LOG_UPLOAD_ERROR);
         }
     }
 
@@ -124,8 +127,7 @@ public class PointLogService {
                     StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 
         } catch (IOException e) {
-            throw new FileException("락 에러 로그 업로드를 실패했습니다.");
-
+            throw new TodakException(LOCK_ERROR_LOG_UPLOAD_ERROR);
         }
     }
 

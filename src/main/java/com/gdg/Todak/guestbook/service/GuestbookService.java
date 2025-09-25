@@ -1,13 +1,12 @@
 package com.gdg.Todak.guestbook.service;
 
+import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.friend.service.FriendCheckService;
 import com.gdg.Todak.guestbook.controller.dto.AddGuestbookRequest;
 import com.gdg.Todak.guestbook.controller.dto.AddGuestbookResponse;
 import com.gdg.Todak.guestbook.controller.dto.DeleteGuestbookRequest;
 import com.gdg.Todak.guestbook.controller.dto.GetGuestbookResponse;
 import com.gdg.Todak.guestbook.entity.Guestbook;
-import com.gdg.Todak.guestbook.exception.NotFoundException;
-import com.gdg.Todak.guestbook.exception.UnauthorizedException;
 import com.gdg.Todak.guestbook.repository.GuestbookRepository;
 import com.gdg.Todak.member.domain.AuthenticateUser;
 import com.gdg.Todak.member.domain.Member;
@@ -20,6 +19,8 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
+
+import static com.gdg.Todak.common.exception.errors.GuestbookError.*;
 
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -46,7 +47,7 @@ public class GuestbookService {
         List<Member> acceptedMembers = friendCheckService.getFriendMembers(friendId);
 
         if (!acceptedMembers.contains(member)) {
-            throw new UnauthorizedException("해당 방명록을 조회할 권한이 없습니다. 본인이거나 친구일 경우에만 조회가 가능합니다.");
+            throw new TodakException(NOT_ALLOWED_TO_LOOK_UP_GUESTBOOK_ERROR);
         }
 
         return guestbookRepository.findValidGuestbooksByReceiverUserId(friendId).stream()
@@ -64,7 +65,7 @@ public class GuestbookService {
         List<Member> acceptedMembers = friendCheckService.getFriendMembers(receiver.getUserId());
 
         if (!acceptedMembers.contains(sender)) {
-            throw new UnauthorizedException("해당 방명록에 작성할 권한이 없습니다. 본인이거나 친구일 경우에만 작성이 가능합니다.");
+            throw new TodakException(NOT_ALLOWED_TO_WRITE_GUESTBOOK_ERROR);
         }
 
         Guestbook guestbook = Guestbook.of(sender, receiver, request.getContent(), expiresAt);
@@ -79,7 +80,7 @@ public class GuestbookService {
         Guestbook guestbook = getMyGuestbook(request);
 
         if (isNotGuestbookOwner(member, guestbook)) {
-            throw new UnauthorizedException("방명록 주인이 아닙니다.");
+            throw new TodakException(NOT_GUESTBOOK_OWNER_ERROR);
         }
 
         guestbookRepository.delete(guestbook);
@@ -100,7 +101,7 @@ public class GuestbookService {
         Optional<Guestbook> guestbookOptional = guestbookRepository.findById(request.getGuestbookId());
 
         if (guestbookOptional.isEmpty()) {
-            throw new NotFoundException("존재하지 않는 방명록 입니다.");
+            throw new TodakException(GUESTBOOK_NOT_FOUND_ERROR);
         }
 
         return guestbookOptional.get();
@@ -108,6 +109,6 @@ public class GuestbookService {
 
     private Member getMember(String userId) {
         return memberRepository.findByUserId(userId)
-                .orElseThrow(() -> new NotFoundException("멤버가 존재하지 않습니다."));
+                .orElseThrow(() -> new TodakException(MEMBER_NOT_FOUND_ERROR));
     }
 }

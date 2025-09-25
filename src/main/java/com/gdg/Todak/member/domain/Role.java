@@ -2,6 +2,9 @@ package com.gdg.Todak.member.domain;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.gdg.Todak.common.exception.TodakException;
+
+import static com.gdg.Todak.common.exception.errors.MemberError.INVALID_ROLE_ERROR;
 
 public enum Role {
     USER("USER"),
@@ -25,6 +28,6 @@ public enum Role {
                 return role;
             }
         }
-        throw new IllegalArgumentException(value);
+        throw new TodakException(INVALID_ROLE_ERROR);
     }
 }

@@ -1,7 +1,7 @@
 package com.gdg.Todak.friend.service;
 
-import com.gdg.Todak.friend.FriendStatus;
 import com.gdg.Todak.friend.entity.Friend;
+import com.gdg.Todak.friend.entity.FriendStatus;
 import com.gdg.Todak.friend.repository.FriendRepository;
 import com.gdg.Todak.member.domain.Member;
 import com.gdg.Todak.member.repository.MemberRepository;

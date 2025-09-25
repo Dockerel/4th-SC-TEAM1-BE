@@ -2,6 +2,7 @@ package com.gdg.Todak.notification.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.notification.entity.Notification;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+
+import static com.gdg.Todak.common.exception.errors.NotificationError.NOTIFICATION_CREATION_ERROR;
 
 
 @RequiredArgsConstructor
@@ -53,7 +56,8 @@ public class RedisSubscriberService {
                 Notification notification = objectMapper.readValue(message, Notification.class);
                 sendNotificationToEmitters(notification);
             } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
+                log.info("Error while parsing json message: {}", e.getMessage());
+                throw new TodakException(NOTIFICATION_CREATION_ERROR);
             }
         });
     }

@@ -2,12 +2,11 @@ package com.gdg.Todak.event.listener;
 
 import com.gdg.Todak.diary.entity.Diary;
 import com.gdg.Todak.event.event.NewDiaryEvent;
-import com.gdg.Todak.friend.FriendStatus;
 import com.gdg.Todak.friend.entity.Friend;
+import com.gdg.Todak.friend.entity.FriendStatus;
 import com.gdg.Todak.friend.repository.FriendRepository;
 import com.gdg.Todak.notification.dto.PublishNotificationRequest;
 import com.gdg.Todak.notification.facade.NotificationFacade;
-import com.gdg.Todak.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
