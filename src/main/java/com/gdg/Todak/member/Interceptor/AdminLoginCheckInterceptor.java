@@ -12,7 +12,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import java.util.Optional;
 
-import static com.gdg.Todak.member.util.SessionConst.ADMIN_LOGIN_MEMBER;
+import static com.gdg.Todak.member.util.AuthConst.ADMIN_LOGIN_MEMBER;
 
 @RequiredArgsConstructor
 @Component

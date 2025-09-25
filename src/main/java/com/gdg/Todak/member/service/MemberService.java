@@ -97,7 +97,7 @@ public class MemberService {
 
         eventPublisher.publishEvent(LoginEvent.of(member));
 
-        return LoginResponse.of(member.getUserId(), member.getNickname(), accessToken, refreshToken);
+        return LoginResponse.of(accessToken, refreshToken);
     }
 
     public LogoutResponse logout(AuthenticateUser user) {
@@ -285,6 +285,6 @@ public class MemberService {
 
     private void saveRefreshToken(String refreshToken, Member member) {
         String memberId = member.getId().toString();
-        redisTemplate.opsForValue().set(memberId, refreshToken, 14, TimeUnit.DAYS);
+        redisTemplate.opsForValue().set(refreshToken, memberId, 14, TimeUnit.DAYS);
     }
 }

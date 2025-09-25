@@ -24,7 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.gdg.Todak.member.util.SessionConst.ADMIN_LOGIN_MEMBER;
+import static com.gdg.Todak.member.util.AuthConst.ADMIN_LOGIN_MEMBER;
 
 @RequiredArgsConstructor
 @RequestMapping("/admin")

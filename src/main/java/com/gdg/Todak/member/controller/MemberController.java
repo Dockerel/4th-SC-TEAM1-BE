@@ -1,23 +1,25 @@
 package com.gdg.Todak.member.controller;
 
 import com.gdg.Todak.common.domain.ApiResponse;
-import com.gdg.Todak.member.controller.request.ProfileRequest;
 import com.gdg.Todak.member.controller.request.*;
 import com.gdg.Todak.member.domain.AuthenticateUser;
 import com.gdg.Todak.member.resolver.Login;
-import com.gdg.Todak.member.service.response.LoginResponse;
 import com.gdg.Todak.member.service.MemberService;
-import com.gdg.Todak.member.service.response.CheckUserIdServiceResponse;
-import com.gdg.Todak.member.service.response.LogoutResponse;
-import com.gdg.Todak.member.service.response.MeResponse;
-import com.gdg.Todak.member.service.response.MemberResponse;
+import com.gdg.Todak.member.service.response.*;
+import com.gdg.Todak.member.util.AuthConst;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.Duration;
+
+import static com.gdg.Todak.member.util.AuthConst.*;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/members")
@@ -42,8 +44,19 @@ public class MemberController {
 
     @PostMapping("/login")
     @Operation(summary = "로그인", description = "유저 아이디와 비밀번호로 로그인한다. 성공시 accessToken과 refreshToken이 반환된다.")
-    public ApiResponse<LoginResponse> login(@RequestBody LoginRequest request) {
-        return ApiResponse.ok(memberService.login(request.toServiceRequest()));
+    public ApiResponse<LoginResponse> login(@RequestBody LoginRequest request, HttpServletResponse response) {
+        LoginResponse tokens = memberService.login(request.toServiceRequest());
+
+        ResponseCookie refresh = ResponseCookie.from(REFRESH_TOKEN, tokens.getRefreshToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(Duration.ofDays(14))
+                .sameSite("None")
+                .build();
+        response.addHeader(SET_COOKIE, refresh.toString());
+
+        return ApiResponse.ok(tokens.getAccessToken());
     }
 
     @PostMapping("/logout")
