@@ -1,6 +1,7 @@
 package com.gdg.Todak.diary.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gdg.Todak.common.interceptor.QueryCountInterceptor;
 import com.gdg.Todak.diary.Emotion;
 import com.gdg.Todak.diary.dto.DiaryDetailResponse;
 import com.gdg.Todak.diary.dto.DiaryRequest;
@@ -30,8 +31,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -65,6 +65,9 @@ class DiaryControllerTest {
     private AdminLoginCheckInterceptor adminLoginCheckInterceptor;
 
     @MockitoBean
+    private QueryCountInterceptor queryCountInterceptor;
+
+    @MockitoBean
     private MemberRepository memberRepository;
 
     @BeforeEach
@@ -76,6 +79,7 @@ class DiaryControllerTest {
 
         when(loginMemberArgumentResolver.supportsParameter(any())).thenReturn(true);
         when(loginMemberArgumentResolver.resolveArgument(any(), any(), any(), any())).thenReturn(authenticateUser);
+        when(queryCountInterceptor.preHandle(any(), any(), any())).thenReturn(true);
     }
 
     @Test
@@ -83,7 +87,7 @@ class DiaryControllerTest {
     void writeDiaryTest() throws Exception {
         // given
         DiaryRequest request = new DiaryRequest("오늘은 좋은 하루였다.", Emotion.HAPPY, storageUUID);
-        doNothing().when(diaryFacade).writeDiary(anyString(), any(DiaryRequest.class));
+        doReturn(1L).when(diaryFacade).writeDiary(anyString(), any(DiaryRequest.class));
 
         // when
         mockMvc.perform(post("/api/v1/diaries")

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import static com.gdg.Todak.member.util.SessionConst.ADMIN_LOGIN_MEMBER;
+import static com.gdg.Todak.member.util.AuthConst.ADMIN_LOGIN_MEMBER;
 
 @RequiredArgsConstructor
 @Controller

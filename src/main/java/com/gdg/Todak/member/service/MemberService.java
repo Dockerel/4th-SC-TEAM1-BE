@@ -97,13 +97,12 @@ public class MemberService {
 
         eventPublisher.publishEvent(LoginEvent.of(member));
 
-        return LoginResponse.of(member.getUserId(), member.getNickname(), accessToken, refreshToken);
+        return LoginResponse.of(accessToken, refreshToken);
     }
 
-    public LogoutResponse logout(AuthenticateUser user) {
-        if (user != null) {
-            Member member = findMemberByUserId(user.getUserId());
-            redisTemplate.delete(member.getId());
+    public LogoutResponse logout(String refreshToken) {
+        if (refreshToken != null) {
+            redisTemplate.delete(refreshToken);
         }
 
         String message = "성공적으로 로그아웃 되었습니다.";
@@ -285,6 +284,6 @@ public class MemberService {
 
     private void saveRefreshToken(String refreshToken, Member member) {
         String memberId = member.getId().toString();
-        redisTemplate.opsForValue().set(memberId, refreshToken, 14, TimeUnit.DAYS);
+        redisTemplate.opsForValue().set(refreshToken, memberId, 14, TimeUnit.DAYS);
     }
 }

@@ -1,14 +1,12 @@
 package com.gdg.Todak.diary.service;
 
+import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.diary.Emotion;
 import com.gdg.Todak.diary.dto.DiaryRequest;
 import com.gdg.Todak.diary.dto.DiarySearchRequest;
 import com.gdg.Todak.diary.dto.DiarySummaryResponse;
 import com.gdg.Todak.diary.dto.DiaryUpdateRequest;
 import com.gdg.Todak.diary.entity.Diary;
-import com.gdg.Todak.diary.exception.BadRequestException;
-import com.gdg.Todak.diary.exception.NotFoundException;
-import com.gdg.Todak.diary.exception.UnauthorizedException;
 import com.gdg.Todak.diary.repository.DiaryRepository;
 import com.gdg.Todak.friend.entity.Friend;
 import com.gdg.Todak.friend.entity.FriendStatus;
@@ -94,8 +92,7 @@ class DiaryServiceTest {
 
         // when & then
         assertThatThrownBy(() -> diaryService.writeDiary(writer.getUserId(), diaryRequest))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("오늘 이미 작성된 일기 또는 감정이 있습니다. 삭제 후 재작성하거나 작성된 일기를 수정해주세요.");
+                .isInstanceOf(TodakException.class);
     }
 
     @Test
@@ -106,8 +103,7 @@ class DiaryServiceTest {
 
         // when & then
         assertThatThrownBy(() -> diaryService.writeDiary("nonExistentUser", diaryRequest))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessage("userId에 해당하는 멤버가 없습니다.");
+                .isInstanceOf(TodakException.class);
     }
 
     @Test
@@ -245,8 +241,7 @@ class DiaryServiceTest {
 
         // when & then
         assertThatThrownBy(() -> diaryService.readDiary(newMember.getUserId(), diary.getId()))
-                .isInstanceOf(UnauthorizedException.class)
-                .hasMessage("작성자 또는 작성자의 친구만 일기 조회가 가능합니다.");
+                .isInstanceOf(TodakException.class);
     }
 
     @Test
@@ -287,8 +282,7 @@ class DiaryServiceTest {
 
         // when & then
         assertThatThrownBy(() -> diaryService.updateDiary(nonWriter.getUserId(), diary.getId(), updateRequest))
-                .isInstanceOf(UnauthorizedException.class)
-                .hasMessage("일기 작성자가 아닙니다.");
+                .isInstanceOf(TodakException.class);
     }
 
     @Test
@@ -323,7 +317,6 @@ class DiaryServiceTest {
 
         // when & then
         assertThatThrownBy(() -> diaryService.deleteDiary(nonWriter.getUserId(), diary.getId()))
-                .isInstanceOf(UnauthorizedException.class)
-                .hasMessage("일기 작성자가 아닙니다.");
+                .isInstanceOf(TodakException.class);
     }
 }

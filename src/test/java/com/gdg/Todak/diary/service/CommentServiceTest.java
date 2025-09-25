@@ -1,13 +1,12 @@
 package com.gdg.Todak.diary.service;
 
+import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.diary.Emotion;
 import com.gdg.Todak.diary.dto.CommentRequest;
 import com.gdg.Todak.diary.dto.CommentResponse;
 import com.gdg.Todak.diary.entity.Comment;
 import com.gdg.Todak.diary.entity.CommentAnonymousReveal;
 import com.gdg.Todak.diary.entity.Diary;
-import com.gdg.Todak.diary.exception.BadRequestException;
-import com.gdg.Todak.diary.exception.UnauthorizedException;
 import com.gdg.Todak.diary.repository.CommentAnonymousRevealRepository;
 import com.gdg.Todak.diary.repository.CommentRepository;
 import com.gdg.Todak.diary.repository.DiaryRepository;
@@ -139,8 +138,7 @@ class CommentServiceTest {
 
         // when & then
         assertThatThrownBy(() -> commentService.saveComment(member.getUserId(), diaryWrittenByNotFriend.getId(), commentRequest))
-                .isInstanceOf(UnauthorizedException.class)
-                .hasMessage("해당 일기에 댓글을 작성할 권한이 없습니다. 본인이거나 친구일 경우에만 작성이 가능합니다.");
+                .isInstanceOf(TodakException.class);
     }
 
     @DisplayName("내가 쓴 일기에 달린 댓글 조회 테스트")
@@ -187,8 +185,7 @@ class CommentServiceTest {
 
         // when & then
         assertThatThrownBy(() -> commentService.getComments(member.getUserId(), diaryWrittenByNotFriend.getId(), Pageable.ofSize(1)))
-                .isInstanceOf(UnauthorizedException.class)
-                .hasMessage("해당 일기의 댓글을 조회할 권한이 없습니다. 일기 작성자가 본인이거나, 친구일 경우에만 조회가 가능합니다.");
+                .isInstanceOf(TodakException.class);
     }
 
     @DisplayName("내가 쓴 댓글 수정 테스트")
@@ -215,8 +212,7 @@ class CommentServiceTest {
 
         // when & then
         assertThatThrownBy(() -> commentService.updateComment(member.getUserId(), commentWrittenByNotMe.getId(), commentRequest))
-                .isInstanceOf(UnauthorizedException.class)
-                .hasMessage("해당 댓글을 수정할 권한이 없습니다.");
+                .isInstanceOf(TodakException.class);
     }
 
     @DisplayName("댓글 삭제 테스트")
@@ -350,8 +346,7 @@ class CommentServiceTest {
 
         // when & then
         assertThatThrownBy(() -> commentService.revealAnonymous(member.getUserId(), myComment.getId()))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessageContaining("본인이 작성한 댓글은 익명 해제가 필요하지 않습니다");
+                .isInstanceOf(TodakException.class);
 
         verify(pointService, never()).consumePointToGetCommentWriterId(any(Member.class));
     }

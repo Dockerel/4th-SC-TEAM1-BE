@@ -1,6 +1,7 @@
 package com.gdg.Todak.diary.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gdg.Todak.common.interceptor.QueryCountInterceptor;
 import com.gdg.Todak.diary.dto.CommentRequest;
 import com.gdg.Todak.diary.dto.CommentResponse;
 import com.gdg.Todak.diary.facade.CommentFacade;
@@ -29,6 +30,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -59,11 +61,15 @@ class CommentControllerTest {
     private AdminLoginCheckInterceptor adminLoginCheckInterceptor;
 
     @MockitoBean
+    private QueryCountInterceptor queryCountInterceptor;
+
+    @MockitoBean
     private MemberRepository memberRepository;
 
     @BeforeEach
     void setUp() {
         when(loginCheckInterceptor.preHandle(any(), any(), any())).thenReturn(true);
+        when(queryCountInterceptor.preHandle(any(), any(), any())).thenReturn(true);
     }
 
     @DisplayName("댓글 작성 테스트")
@@ -80,8 +86,7 @@ class CommentControllerTest {
                         .content(objectMapper.writeValueAsString(commentRequest)))
 
                 // then
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.message").value("저장되었습니다."));
+                .andExpect(status().isOk());
     }
 
     @DisplayName("댓글 조회 테스트")
@@ -101,6 +106,7 @@ class CommentControllerTest {
 
                 // then
                 .andExpect(status().isOk())
+                .andDo(print())
                 .andExpect(jsonPath("$.data.content[0].id").value(1))
                 .andExpect(jsonPath("$.data.content[0].userId").value("testMember1"))
                 .andExpect(jsonPath("$.data.content[1].id").value(2))

@@ -2,10 +2,10 @@ package com.gdg.Todak.member.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.member.domain.AuthenticateUser;
 import com.gdg.Todak.member.domain.Jwt;
 import com.gdg.Todak.member.domain.Member;
-import com.gdg.Todak.member.exception.UnauthorizedException;
 import com.gdg.Todak.member.repository.MemberRepository;
 import com.gdg.Todak.member.repository.MemberRoleRepository;
 import com.gdg.Todak.member.service.request.LoginServiceRequest;
@@ -78,12 +78,7 @@ class AuthServiceTest {
         LoginResponse jwt = memberService.login(loginRequest);
 
         // when
-        UpdateAccessTokenServiceRequest updateAccessTokenServiceRequest = UpdateAccessTokenServiceRequest.builder()
-                .accessToken(jwt.getAccessToken())
-                .refreshToken(jwt.getRefreshToken())
-                .build();
-
-        Jwt newJwt = authService.updateAccessToken(updateAccessTokenServiceRequest);
+        Jwt newJwt = authService.updateAccessToken(jwt.getRefreshToken());
 
         Claims claims = jwtProvider.getClaims(newJwt.getAccessToken());
         String json = claims.get(AUTHENTICATE_USER).toString();
@@ -113,15 +108,11 @@ class AuthServiceTest {
         LoginResponse jwt = memberService.login(loginRequest);
 
         // when
-        UpdateAccessTokenServiceRequest updateAccessTokenServiceRequest = UpdateAccessTokenServiceRequest.builder()
-            .accessToken(jwt.getAccessToken())
-            .refreshToken("invalid_refresh_token")
-            .build();
+        String invalidRefreshToken = "invalid_refresh_token";
 
         // then
-        assertThatThrownBy(() -> authService.updateAccessToken(updateAccessTokenServiceRequest))
-            .isInstanceOf(UnauthorizedException.class)
-            .hasMessage("유효하지 않은 리프레시 토큰입니다.");
+        assertThatThrownBy(() -> authService.updateAccessToken(invalidRefreshToken))
+            .isInstanceOf(TodakException.class);
     }
 
     private void createMember(String userId, String password, String passwordCheck) {

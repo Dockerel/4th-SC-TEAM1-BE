@@ -39,13 +39,15 @@ public class CommentController {
     public ApiResponse<Page<CommentResponse>> getComments(@PathVariable("diaryId") Long diaryId,
                                                           @Parameter(hidden = true) @Login AuthenticateUser authenticateUser,
                                                           @Parameter(hidden = true) @PageableDefault Pageable pageable) {
+        System.out.println("CommentController.getComments");
         Page<CommentResponse> commentResponses = commentService.getComments(authenticateUser.getUserId(), diaryId, pageable);
+        int size = commentResponses.getSize();
+        System.out.println("size = " + size);
         return ApiResponse.ok(commentResponses);
     }
 
     @PostMapping("/{diaryId}")
     @Operation(summary = "댓글 작성", description = "댓글 달기, 본인 또는 친구의 일기에만 작성 가능")
-    @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<Void> saveComment(@RequestBody CommentRequest commentRequest, @PathVariable("diaryId") Long diaryId,
                                          @Parameter(hidden = true) @Login AuthenticateUser authenticateUser) {
         commentFacade.saveComment(authenticateUser.getUserId(), diaryId, commentRequest);

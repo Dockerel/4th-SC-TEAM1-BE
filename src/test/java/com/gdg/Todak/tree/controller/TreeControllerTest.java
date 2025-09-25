@@ -1,6 +1,7 @@
 package com.gdg.Todak.tree.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gdg.Todak.common.interceptor.QueryCountInterceptor;
 import com.gdg.Todak.member.Interceptor.AdminLoginCheckInterceptor;
 import com.gdg.Todak.member.Interceptor.LoginCheckInterceptor;
 import com.gdg.Todak.member.domain.AuthenticateUser;
@@ -54,12 +55,16 @@ class TreeControllerTest {
     @MockitoBean
     private LoginMemberArgumentResolver loginMemberArgumentResolver;
 
+    @MockitoBean
+    private QueryCountInterceptor queryCountInterceptor;
+
     private AuthenticateUser authenticateUser;
 
     @BeforeEach
     void setUp() throws Exception {
         authenticateUser = new AuthenticateUser("testUser", Set.of(Role.USER));
         when(loginCheckInterceptor.preHandle(any(), any(), any())).thenReturn(true);
+        when(queryCountInterceptor.preHandle(any(), any(), any())).thenReturn(true);
         when(loginMemberArgumentResolver.supportsParameter(any())).thenReturn(true);
         when(loginMemberArgumentResolver.resolveArgument(any(), any(), any(), any())).thenReturn(authenticateUser);
     }

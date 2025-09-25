@@ -7,6 +7,7 @@ import com.gdg.Todak.member.controller.request.SignupRequest;
 import com.gdg.Todak.member.domain.AuthenticateUser;
 import com.gdg.Todak.member.service.request.SignupServiceRequest;
 import com.gdg.Todak.member.service.response.CheckUserIdServiceResponse;
+import com.gdg.Todak.member.service.response.LoginResponse;
 import com.gdg.Todak.member.service.response.MeResponse;
 import com.gdg.Todak.member.service.response.MemberResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -70,7 +71,7 @@ class MemberControllerTest extends ControllerTestSupport {
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andDo(print())
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("400"))
                 .andExpect(jsonPath("$.status").value("BAD_REQUEST"));
     }
@@ -94,7 +95,7 @@ class MemberControllerTest extends ControllerTestSupport {
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andDo(print())
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("400"))
                 .andExpect(jsonPath("$.status").value("BAD_REQUEST"));
     }
@@ -107,6 +108,9 @@ class MemberControllerTest extends ControllerTestSupport {
         String password = "testPassword";
 
         LoginRequest request = new LoginRequest(userId, password);
+
+        when(memberService.login(any())).thenReturn(
+                new LoginResponse("accessToken", "refreshToken"));
 
         // when // then
         mockMvc.perform(

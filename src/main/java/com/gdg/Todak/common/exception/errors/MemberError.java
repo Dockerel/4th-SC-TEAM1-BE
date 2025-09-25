@@ -24,7 +24,9 @@ public enum MemberError implements ErrorInfo {
     INVALID_TOKEN_ERROR(UNAUTHORIZED, "토큰이 없거나, 헤더 형식에 맞지 않습니다."),
     PASSWORD_ERROR(UNAUTHORIZED, "비밀번호가 올바르지 않습니다."),
 
-    MEMBER_NOT_FOUND_ERROR(NOT_FOUND, "존재하지 않는 유저정보 입니다.");
+    MEMBER_NOT_FOUND_ERROR(NOT_FOUND, "존재하지 않는 유저정보 입니다."),
+
+    EXPIRED_REFRESH_TOKEN_ERROR(FORBIDDEN, "리프레시 토큰이 없거나, 만료되었습니다.");
 
     private final HttpStatus status;
     private final String message;
