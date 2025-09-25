@@ -3,15 +3,13 @@ package com.gdg.Todak.diary.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gdg.Todak.common.config.AiModelConfig;
+import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.diary.dto.AICommentByGeminiResponse;
 import com.gdg.Todak.diary.dto.CommentRequest;
 import com.gdg.Todak.diary.dto.CommentResponse;
 import com.gdg.Todak.diary.entity.Comment;
 import com.gdg.Todak.diary.entity.CommentAnonymousReveal;
 import com.gdg.Todak.diary.entity.Diary;
-import com.gdg.Todak.diary.exception.BadRequestException;
-import com.gdg.Todak.diary.exception.NotFoundException;
-import com.gdg.Todak.diary.exception.UnauthorizedException;
 import com.gdg.Todak.diary.repository.CommentAnonymousRevealRepository;
 import com.gdg.Todak.diary.repository.CommentRepository;
 import com.gdg.Todak.diary.repository.DiaryRepository;
@@ -33,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.ZoneId;
 import java.util.List;
 
+import static com.gdg.Todak.common.exception.errors.DiaryError.*;
 import static com.gdg.Todak.diary.util.AiCommentPrompt.*;
 
 @Service
@@ -66,7 +65,7 @@ public class CommentService {
         List<Member> acceptedMembers = friendCheckService.getFriendMembers(diary.getMember().getUserId());
 
         if (!diary.isWriter(member) && !acceptedMembers.contains(member)) {
-            throw new UnauthorizedException("해당 일기의 댓글을 조회할 권한이 없습니다. 일기 작성자가 본인이거나, 친구일 경우에만 조회가 가능합니다.");
+            throw new TodakException(NOT_ALLOWED_COMMENT_LOOK_UP_MEMBER_ERROR);
         }
 
         Page<Comment> comments = commentRepository.findAllByDiary(diary, pageable);
@@ -116,7 +115,7 @@ public class CommentService {
         List<Member> acceptedMembers = friendCheckService.getFriendMembers(diary.getMember().getUserId());
 
         if (!diary.isWriter(member) && !acceptedMembers.contains(member)) {
-            throw new UnauthorizedException("해당 일기에 댓글을 작성할 권한이 없습니다. 본인이거나 친구일 경우에만 작성이 가능합니다.");
+            throw new TodakException(NOT_ALLOWED_COMMENT_MEMBER_ERROR);
         }
 
         Comment comment = Comment.builder()
@@ -133,7 +132,7 @@ public class CommentService {
         Comment comment = getComment(commentId);
 
         if (comment.isNotWriter(member)) {
-            throw new UnauthorizedException("해당 댓글을 수정할 권한이 없습니다.");
+            throw new TodakException(NOT_COMMENT_OWNER_ERROR);
         }
 
         comment.updateComment(commentRequest.content());
@@ -145,7 +144,7 @@ public class CommentService {
         Comment comment = getComment(commentId);
 
         if (comment.isNotWriter(member)) {
-            throw new UnauthorizedException("해당 댓글을 삭제할 권한이 없습니다.");
+            throw new TodakException(NOT_COMMENT_OWNER_ERROR);
         }
 
         commentRepository.delete(comment);
@@ -161,7 +160,7 @@ public class CommentService {
         }
 
         if (comment.getMember().equals(member)) {
-            throw new BadRequestException("본인이 작성한 댓글은 익명 해제가 필요하지 않습니다.");
+            throw new TodakException(SELF_AUTHORED_COMMENT_ERROR);
         }
 
         pointFacade.consumePointToGetCommentWriterId(member);
@@ -173,17 +172,17 @@ public class CommentService {
 
     private Comment getComment(Long commentId) {
         return commentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException("commentId에 해당하는 댓글이 없습니다."));
+                .orElseThrow(() -> new TodakException(COMMENT_NOT_FOUND_BY_COMMENT_ID_ERROR));
     }
 
     private Diary getDiary(Long diaryId) {
         return diaryRepository.findById(diaryId)
-                .orElseThrow(() -> new NotFoundException("diaryId에 해당하는 일기가 없습니다."));
+                .orElseThrow(() -> new TodakException(DIARY_NOT_FOUND_BY_DIARY_ID_ERROR));
     }
 
     private Member getMember(String userId) {
         return memberRepository.findByUserId(userId)
-                .orElseThrow(() -> new NotFoundException("userId에 해당하는 멤버가 없습니다."));
+                .orElseThrow(() -> new TodakException(USER_NOT_FOUND_BY_USER_ID_ERROR));
     }
 
     @Transactional
@@ -212,7 +211,7 @@ public class CommentService {
 
             return parsedResponse.getComment();
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new TodakException(AI_COMMENT_JSON_PARSING_ERROR);
         }
     }
 

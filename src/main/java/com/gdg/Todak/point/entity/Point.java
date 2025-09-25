@@ -1,15 +1,19 @@
 package com.gdg.Todak.point.entity;
 
+import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.member.domain.Member;
 import com.gdg.Todak.point.PointType;
-import com.gdg.Todak.point.exception.BadRequestException;
 import com.gdg.Todak.tree.domain.GrowthButton;
 import com.gdg.Todak.tree.domain.TreeExperiencePolicy;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+
+import static com.gdg.Todak.common.exception.errors.PointError.INVALID_GROWTH_BUTTON_ERROR;
+import static com.gdg.Todak.common.exception.errors.PointError.POINT_LACK_ERROR;
 
 @ToString
 @Entity
@@ -18,6 +22,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @Builder
 @Getter
 @Setter
+@Slf4j
 public class Point {
 
     private final static int INITIAL_POINT = 0;
@@ -40,9 +45,8 @@ public class Point {
 
     public void consumePoint(int point) {
         if (this.point - point < 0) {
-            throw new BadRequestException(
-                    String.format("요청하신 포인트(%dP)를 사용할 수 없습니다. 현재 보유 포인트는 %dP입니다.", point, this.point)
-            );
+            log.info("요청하신 포인트({}P)를 사용할 수 없습니다. 현재 보유 포인트는 {}P입니다.", point, this.point);
+            throw new TodakException(POINT_LACK_ERROR);
         }
         this.point -= point;
     }
@@ -69,7 +73,7 @@ public class Point {
             case GrowthButton.NUTRIENT -> {
                 return PointType.GROWTH_NUTRIENT;
             }
-            default -> throw new BadRequestException("올바른 growthButton이 아닙니다.");
+            default -> throw new TodakException(INVALID_GROWTH_BUTTON_ERROR);
         }
     }
 
@@ -84,7 +88,7 @@ public class Point {
             case GrowthButton.NUTRIENT -> {
                 return TreeExperiencePolicy.NUTRIENT_SPEND.getValue();
             }
-            default -> throw new BadRequestException("올바른 growthButton이 아닙니다.");
+            default -> throw new TodakException(INVALID_GROWTH_BUTTON_ERROR);
         }
     }
 

@@ -1,10 +1,8 @@
 package com.gdg.Todak.diary.service;
 
+import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.diary.dto.*;
 import com.gdg.Todak.diary.entity.Diary;
-import com.gdg.Todak.diary.exception.BadRequestException;
-import com.gdg.Todak.diary.exception.NotFoundException;
-import com.gdg.Todak.diary.exception.UnauthorizedException;
 import com.gdg.Todak.diary.repository.DiaryRepository;
 import com.gdg.Todak.friend.service.FriendCheckService;
 import com.gdg.Todak.member.domain.Member;
@@ -18,6 +16,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+
+import static com.gdg.Todak.common.exception.errors.DiaryError.*;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +38,7 @@ public class DiaryService {
         Instant endOfDay = today.atTime(23, 59, 59, 99).atZone(ZoneId.systemDefault()).toInstant();
 
         if (diaryRepository.existsByMemberAndCreatedAtBetween(member, startOfDay, endOfDay)) {
-            throw new BadRequestException("오늘 이미 작성된 일기 또는 감정이 있습니다. 삭제 후 재작성하거나 작성된 일기를 수정해주세요.");
+            throw new TodakException(CONFLICT_DIARY_ERROR);
         }
 
         Diary diary = Diary.builder()
@@ -58,13 +58,13 @@ public class DiaryService {
         int month = diarySearchRequest.month();
 
         if (month < 1 || month > 12) {
-            throw new BadRequestException("month의 범위는 1~12 입니다.");
+            throw new TodakException(MONTH_RANGE_ERROR);
         }
 
         List<Diary> diaries = getDiariesByYearAndMonth(year, month, member);
 
         if (!diaries.isEmpty() && !diaries.getFirst().isWriter(member)) {
-            throw new UnauthorizedException("일기 작성자가 아닙니다.");
+            throw new TodakException(NOT_DIARY_OWNER_ERROR);
         }
 
         return diaries.stream()
@@ -82,13 +82,13 @@ public class DiaryService {
         int month = diarySearchRequest.month();
 
         if (month < 1 || month > 12) {
-            throw new BadRequestException("month의 범위는 1~12 입니다.");
+            throw new TodakException(MONTH_RANGE_ERROR);
         }
 
         List<Member> acceptedMembers = friendCheckService.getFriendMembers(userId);
 
         if (!acceptedMembers.contains(friendMember)) {
-            throw new UnauthorizedException("친구만 조회 가능합니다.");
+            throw new TodakException(NOT_FRIEND_ERROR);
         }
 
         List<Diary> diaries = getDiariesByYearAndMonth(year, month, friendMember);
@@ -115,7 +115,7 @@ public class DiaryService {
         Member member = getMember(userId);
 
         Diary diary = diaryRepository.findById(diaryId)
-                .orElseThrow(() -> new NotFoundException("diary id에 해당하는 일기가 없습니다."));
+                .orElseThrow(() -> new TodakException(DIARY_NOT_FOUND_BY_DIARY_ID_ERROR));
 
         LocalDateTime createdAt = diary.getCreatedAt().atZone(ZoneId.systemDefault()).toLocalDateTime();
 
@@ -126,7 +126,7 @@ public class DiaryService {
         List<Member> acceptedMembers = friendCheckService.getFriendMembers(diary.getMember().getUserId());
 
         if (!acceptedMembers.contains(member)) {
-            throw new UnauthorizedException("작성자 또는 작성자의 친구만 일기 조회가 가능합니다.");
+            throw new TodakException(NOT_ALLOWED_DIARY_LOOK_UP_MEMBER_ERROR);
         }
 
         return new DiaryDetailResponse(diary.getId(), createdAt, diary.getContent(), diary.getEmotion(), diary.getStorageUUID(), false);
@@ -137,10 +137,10 @@ public class DiaryService {
         Member member = getMember(userId);
 
         Diary diary = diaryRepository.findById(diaryId)
-                .orElseThrow(() -> new NotFoundException("diary id에 해당하는 일기가 없습니다."));
+                .orElseThrow(() -> new TodakException(DIARY_NOT_FOUND_BY_DIARY_ID_ERROR));
 
         if (!diary.isWriter(member)) {
-            throw new UnauthorizedException("일기 작성자가 아닙니다.");
+            throw new TodakException(NOT_DIARY_OWNER_ERROR);
         }
 
         diary.updateDiary(diaryUpdateRequest.content(), diaryUpdateRequest.emotion());
@@ -151,10 +151,10 @@ public class DiaryService {
         Member member = getMember(userId);
 
         Diary diary = diaryRepository.findById(diaryId)
-                .orElseThrow(() -> new RuntimeException("diary id에 해당하는 일기가 없습니다."));
+                .orElseThrow(() -> new TodakException(DIARY_NOT_FOUND_BY_DIARY_ID_ERROR));
 
         if (!diary.isWriter(member)) {
-            throw new UnauthorizedException("일기 작성자가 아닙니다.");
+            throw new TodakException(NOT_DIARY_OWNER_ERROR);
         }
 
         imageService.deleteAllImagesInStorageUUID(userId, diary.getStorageUUID());
@@ -163,6 +163,6 @@ public class DiaryService {
 
     private Member getMember(String userId) {
         return memberRepository.findByUserId(userId)
-                .orElseThrow(() -> new NotFoundException("userId에 해당하는 멤버가 없습니다."));
+                .orElseThrow(() -> new TodakException(USER_NOT_FOUND_BY_USER_ID_ERROR));
     }
 }

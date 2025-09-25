@@ -2,10 +2,10 @@ package com.gdg.Todak.member.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.member.domain.AuthenticateUser;
 import com.gdg.Todak.member.domain.Member;
 import com.gdg.Todak.member.domain.Role;
-import com.gdg.Todak.member.exception.UnauthorizedException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.security.Key;
 import java.util.*;
 
+import static com.gdg.Todak.common.exception.errors.MemberError.CLAIM_CREATION_ERROR;
 import static com.gdg.Todak.member.util.JwtConstants.AUTHENTICATE_USER;
 
 @Component
@@ -101,7 +102,7 @@ public class JwtProvider {
             String authenticateUserJson = objectMapper.writeValueAsString(authenticateUser);
             claims.put(AUTHENTICATE_USER, authenticateUserJson);
         } catch (IOException e) {
-            throw new UnauthorizedException(e.getMessage());
+            throw new TodakException(CLAIM_CREATION_ERROR);
         }
         return claims;
     }

@@ -1,8 +1,8 @@
 package com.gdg.Todak.friend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gdg.Todak.friend.FriendStatus;
 import com.gdg.Todak.friend.dto.*;
+import com.gdg.Todak.friend.entity.FriendStatus;
 import com.gdg.Todak.friend.facade.FriendFacade;
 import com.gdg.Todak.friend.service.FriendService;
 import com.gdg.Todak.member.Interceptor.AdminLoginCheckInterceptor;

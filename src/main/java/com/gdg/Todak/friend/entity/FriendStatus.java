@@ -1,4 +1,4 @@
-package com.gdg.Todak.friend;
+package com.gdg.Todak.friend.entity;
 
 public enum FriendStatus {
     PENDING,

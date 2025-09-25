@@ -1,5 +1,6 @@
 package com.gdg.Todak.member.service;
 
+import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.event.event.LoginEvent;
 import com.gdg.Todak.member.controller.dto.LoginForm;
 import com.gdg.Todak.member.controller.request.ProfileRequest;
@@ -7,9 +8,6 @@ import com.gdg.Todak.member.domain.AuthenticateUser;
 import com.gdg.Todak.member.domain.Member;
 import com.gdg.Todak.member.domain.MemberRole;
 import com.gdg.Todak.member.domain.Role;
-import com.gdg.Todak.member.exception.BadRequestException;
-import com.gdg.Todak.member.exception.FileException;
-import com.gdg.Todak.member.exception.UnauthorizedException;
 import com.gdg.Todak.member.repository.MemberRepository;
 import com.gdg.Todak.member.repository.MemberRoleRepository;
 import com.gdg.Todak.member.service.request.*;
@@ -19,6 +17,7 @@ import com.gdg.Todak.member.util.PasswordEncoder;
 import com.gdg.Todak.point.service.PointService;
 import com.gdg.Todak.tree.business.TreeService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -35,6 +34,9 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import static com.gdg.Todak.common.exception.errors.MemberError.*;
+
+@Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
@@ -70,30 +72,11 @@ public class MemberService {
         return CheckUserIdServiceResponse.of(findMember.isPresent());
     }
 
-    @Transactional
-    public MemberResponse signup(SignupServiceRequest request) {
-
-        if (!request.getPassword().equals(request.getPasswordCheck())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+    private static void checkPassword(String password, Member member) {
+        String encodedPassword = PasswordEncoder.getEncodedPassword(member.getSalt(), password);
+        if (!encodedPassword.equals(member.getPassword())) {
+            throw new TodakException(PASSWORD_ERROR);
         }
-
-        String salt = PasswordEncoder.getSalt();
-
-        String encodedPassword = PasswordEncoder.getEncodedPassword(salt, request.getPassword());
-
-        Member member = memberRepository.save(
-                Member.of(request.getUserId(), encodedPassword, request.getNickname(), defaultProfileImageUrl, salt));
-
-        MemberRole role = MemberRole.of(Role.USER, member);
-        member.addRole(role);
-
-        memberRoleRepository.save(role);
-
-        pointService.createPoint(member);
-
-        treeService.getTree(member);
-
-        return MemberResponse.of(member.getUserId());
     }
 
     @Transactional
@@ -141,12 +124,46 @@ public class MemberService {
     }
 
     @Transactional
+    public MemberResponse signup(SignupServiceRequest request) {
+
+        if (!request.getPassword().equals(request.getPasswordCheck())) {
+            throw new TodakException(PASSWORD_ERROR);
+        }
+
+        String salt = PasswordEncoder.getSalt();
+
+        String encodedPassword = PasswordEncoder.getEncodedPassword(salt, request.getPassword());
+
+        Member member = memberRepository.save(
+                Member.of(request.getUserId(), encodedPassword, request.getNickname(), defaultProfileImageUrl, salt));
+
+        MemberRole role = MemberRole.of(Role.USER, member);
+        member.addRole(role);
+
+        memberRoleRepository.save(role);
+
+        pointService.createPoint(member);
+
+        treeService.getTree(member);
+
+        return MemberResponse.of(member.getUserId());
+    }
+
+    @Transactional
+    public String deleteMemberProfileImage(AuthenticateUser user) {
+        Member member = findMemberByUserId(user.getUserId());
+        deleteAllImagesInFolder(uploadFolder + user.getUserId() + "/profile_image");
+        member.updateImageUrl(defaultProfileImageUrl);
+        return "프로필 이미지가 삭제되고 기본 이미지로 변경되었습니다.";
+    }
+
+    @Transactional
     public MeResponse editMemberProfileImage(AuthenticateUser user, ProfileRequest serviceRequest) {
         MultipartFile file = serviceRequest.file();
-        if (file.isEmpty()) throw new BadRequestException("이미지가 비어있습니다.");
-        if (file.getSize() > MAX_FILE_SIZE) throw new BadRequestException("파일 크기가 10MB를 초과했습니다.");
+        if (file.isEmpty()) throw new TodakException(EMPTY_IMAGE_ERROR);
+        if (file.getSize() > MAX_FILE_SIZE) throw new TodakException(TOO_BIG_IMAGE_ERROR);
         if (!ALLOWED_MIME_TYPES.contains(file.getContentType()))
-            throw new BadRequestException("잘못된 형식의 이미지를 업로드하였습니다. (가능한 형식: jpg, png, gif, bmp, webp, svg)");
+            throw new TodakException(INVALID_IMAGE_FORMAT_ERROR);
 
         String subDirectory = user.getUserId() + "/profile_image";
         try {
@@ -155,7 +172,7 @@ public class MemberService {
                 Files.createDirectories(directoryPath);
             }
         } catch (IOException e) {
-            throw new FileException("이미지 업로드를 실패하였습니다.");
+            throw new TodakException(IMAGE_UPLOAD_FAILED_ERROR);
         }
 
         String uploadDestination = uploadFolder + subDirectory + "/" + file.getOriginalFilename();
@@ -172,22 +189,15 @@ public class MemberService {
 
             return MeResponse.of(member.getUserId(), member.getNickname(), member.getImageUrl());
         } catch (IOException e) {
-            throw new FileException("프로필 이미지 저장 중 오류가 발생했습니다.");
+            throw new TodakException(IMAGE_SAVE_FAILED_ERROR);
         }
-    }
-
-    @Transactional
-    public String deleteMemberProfileImage(AuthenticateUser user) {
-        Member member = findMemberByUserId(user.getUserId());
-        deleteAllImagesInFolder(uploadFolder + user.getUserId() + "/profile_image");
-        member.updateImageUrl(defaultProfileImageUrl);
-        return "프로필 이미지가 삭제되고 기본 이미지로 변경되었습니다.";
     }
 
     public void deleteAllImagesInFolder(String folderPath) {
         Path dirPath = Paths.get(folderPath);
         if (!Files.exists(dirPath) || !Files.isDirectory(dirPath)) {
-            throw new FileException("유효하지 않은 폴더 경로입니다: " + folderPath);
+            log.info("유효하지 않은 폴더 경로입니다: {}", folderPath);
+            throw new TodakException(INVALID_DIR_ERROR);
         }
 
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(dirPath)) {
@@ -197,27 +207,9 @@ public class MemberService {
                 }
             }
         } catch (IOException e) {
-            throw new FileException("이미지 파일 삭제 중 오류 발생: " + e.getMessage());
+            log.info("이미지 파일 삭제 중 오류 발생: {}", e.getMessage());
+            throw new TodakException(IMAGE_DELETE_ERROR);
         }
-    }
-
-    @Transactional
-    public String changePassword(AuthenticateUser user, ChangePasswordServiceRequest request) {
-        Member member = findMemberByUserId(user.getUserId());
-
-        checkPassword(request.getOldPassword(), member);
-
-        if (!request.getNewPassword().equals(request.getNewPasswordCheck())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-        }
-
-        String salt = member.getSalt();
-
-        String encodedPassword = PasswordEncoder.getEncodedPassword(salt, request.getNewPassword());
-
-        member.setPassword(encodedPassword);
-
-        return "비밀번호가 변경되었습니다.";
     }
 
     @Transactional
@@ -262,21 +254,33 @@ public class MemberService {
         return "AI 댓글 기능이 비활성화되었습니다.";
     }
 
+    @Transactional
+    public String changePassword(AuthenticateUser user, ChangePasswordServiceRequest request) {
+        Member member = findMemberByUserId(user.getUserId());
+
+        checkPassword(request.getOldPassword(), member);
+
+        if (!request.getNewPassword().equals(request.getNewPasswordCheck())) {
+            throw new TodakException(PASSWORD_ERROR);
+        }
+
+        String salt = member.getSalt();
+
+        String encodedPassword = PasswordEncoder.getEncodedPassword(salt, request.getNewPassword());
+
+        member.setPassword(encodedPassword);
+
+        return "비밀번호가 변경되었습니다.";
+    }
+
     public Member findMemberById(Long id) {
         return memberRepository.findById(id)
-                .orElseThrow(() -> new UnauthorizedException("멤버가 존재하지 않습니다."));
+                .orElseThrow(() -> new TodakException(MEMBER_NOT_FOUND_ERROR));
     }
 
     public Member findMemberByUserId(String userId) {
         return memberRepository.findByUserId(userId)
-                .orElseThrow(() -> new UnauthorizedException("멤버가 존재하지 않습니다."));
-    }
-
-    private static void checkPassword(String password, Member member) {
-        String encodedPassword = PasswordEncoder.getEncodedPassword(member.getSalt(), password);
-        if (!encodedPassword.equals(member.getPassword())) {
-            throw new UnauthorizedException("비밀번호가 올바르지 않습니다.");
-        }
+                .orElseThrow(() -> new TodakException(MEMBER_NOT_FOUND_ERROR));
     }
 
     private void saveRefreshToken(String refreshToken, Member member) {

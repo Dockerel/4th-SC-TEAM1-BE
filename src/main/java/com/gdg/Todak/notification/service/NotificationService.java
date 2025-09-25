@@ -1,5 +1,6 @@
 package com.gdg.Todak.notification.service;
 
+import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.notification.dto.PublishNotificationRequest;
 import com.gdg.Todak.notification.entity.Notification;
 import com.gdg.Todak.notification.repository.NotificationRepository;
@@ -15,6 +16,9 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import static com.gdg.Todak.common.exception.errors.NotificationError.NOTIFICATION_NOT_FOUND_ERROR;
+import static com.gdg.Todak.common.exception.errors.NotificationError.NOT_NOTIFICATION_OWNER_ERROR;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -87,9 +91,9 @@ public class NotificationService {
 
     public String deleteAckNotification(String userId, Long notificationId) {
         Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new RuntimeException("Notification not found"));
+                .orElseThrow(() -> new TodakException(NOTIFICATION_NOT_FOUND_ERROR));
         if (notification.getReceiverUserId() != userId) {
-            throw new RuntimeException("Only owner of notification can delete");
+            throw new TodakException(NOT_NOTIFICATION_OWNER_ERROR);
         }
         notificationRepository.delete(notification);
         return "notification deleted";

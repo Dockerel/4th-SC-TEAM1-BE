@@ -1,11 +1,13 @@
 package com.gdg.Todak.member.util;
 
-import com.gdg.Todak.member.exception.EncryptionException;
+import com.gdg.Todak.common.exception.TodakException;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
+
+import static com.gdg.Todak.common.exception.errors.MemberError.PASSWORD_ENCRYPTION_ERROR;
 
 public class PasswordEncoder {
 
@@ -25,7 +27,7 @@ public class PasswordEncoder {
             }
             return salt + sb;
         } catch (NoSuchAlgorithmException e) {
-            throw new EncryptionException("비밀번호 암호화 중에 문제가 발생했습니다.", e);
+            throw new TodakException(PASSWORD_ENCRYPTION_ERROR);
         }
     }
 }

@@ -1,12 +1,15 @@
 package com.gdg.Todak.tree.domain;
 
+import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.member.domain.Member;
-import com.gdg.Todak.point.exception.BadRequestException;
 import com.gdg.Todak.tree.business.dto.TreeEntityUpdateRequest;
 import com.gdg.Todak.tree.business.dto.TreeInfoResponse;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+
+import static com.gdg.Todak.common.exception.errors.PointError.INVALID_GROWTH_BUTTON_ERROR;
+import static com.gdg.Todak.common.exception.errors.PointError.INVALID_LEVEL_ERROR;
 
 @Builder(access = AccessLevel.PROTECTED)
 @Getter
@@ -67,7 +70,7 @@ public class Tree {
             case GrowthButton.NUTRIENT -> {
                 return TreeExperiencePolicy.NUTRIENT_PLUS_EXPERIENCE.getValue();
             }
-            default -> throw new BadRequestException("올바른 growthButton이 아닙니다.");
+            default -> throw new TodakException(INVALID_GROWTH_BUTTON_ERROR);
         }
     }
 
@@ -88,7 +91,7 @@ public class Tree {
             case 5 -> {
                 return TreeExperiencePolicy.LEVEL_FIVE_MAX_EXPERIENCE.getValue();
             }
-            default -> throw new BadRequestException("올바른 level이 아닙니다.");
+            default -> throw new TodakException(INVALID_LEVEL_ERROR);
         }
     }
 

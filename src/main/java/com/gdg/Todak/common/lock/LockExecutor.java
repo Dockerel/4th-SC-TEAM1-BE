@@ -1,6 +1,6 @@
 package com.gdg.Todak.common.lock;
 
-import com.gdg.Todak.common.lock.exception.LockException;
+import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.member.domain.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DeadlockLoserDataAccessException;
@@ -21,7 +21,7 @@ public class LockExecutor {
 
     @Retryable(
             value = {
-                    LockException.class,
+                    TodakException.class,
                     DeadlockLoserDataAccessException.class
             },
             backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, random = true)

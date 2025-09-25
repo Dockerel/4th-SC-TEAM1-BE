@@ -1,6 +1,5 @@
 package com.gdg.Todak.friend.entity;
 
-import com.gdg.Todak.friend.FriendStatus;
 import com.gdg.Todak.friend.exception.BadRequestException;
 import com.gdg.Todak.member.domain.Member;
 import org.junit.jupiter.api.BeforeEach;

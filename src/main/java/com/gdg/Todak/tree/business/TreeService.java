@@ -1,20 +1,21 @@
 package com.gdg.Todak.tree.business;
 
+import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.friend.service.FriendCheckService;
 import com.gdg.Todak.member.domain.Member;
 import com.gdg.Todak.member.repository.MemberRepository;
-import com.gdg.Todak.point.exception.NotFoundException;
 import com.gdg.Todak.point.facade.PointFacade;
 import com.gdg.Todak.tree.business.dto.TreeInfoResponse;
 import com.gdg.Todak.tree.domain.GrowthButton;
 import com.gdg.Todak.tree.domain.Tree;
-import com.gdg.Todak.tree.exception.BadRequestException;
-import com.gdg.Todak.tree.exception.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import static com.gdg.Todak.common.exception.errors.PointError.USER_NOT_FOUND_ERROR;
+import static com.gdg.Todak.common.exception.errors.TreeError.*;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +30,7 @@ public class TreeService {
     @Transactional
     public void getTree(Member member) {
         if (treeRepository.existsByMember(member)) {
-            throw new BadRequestException("한 멤버당 소유할 수 있는 나무의 수는 한그루 입니다.");
+            throw new TodakException(TREE_LIMIT_ERROR);
         }
 
         treeRepository.saveTreeByMember(member);
@@ -42,7 +43,7 @@ public class TreeService {
         Tree tree = treeRepository.findByMember(member).toDomain();
 
         if (tree.isMaxGrowth()) {
-            throw new BadRequestException("최고 레벨입니다.");
+            throw new TodakException(MAX_LEVEL_ERROR);
         }
 
         pointFacade.consumePointByGrowthButton(member, growthButton);
@@ -59,7 +60,7 @@ public class TreeService {
         Tree tree = treeRepository.findByMember(member).toDomain();
 
         if (!tree.isMyTree(member)) {
-            throw new UnauthorizedException("본인의 나무 정보만 조회 가능합니다.");
+            throw new TodakException(ONLY_OWN_TREE_LOOKUP_ERROR);
         }
 
         return tree.toTreeInfoResponse();
@@ -71,7 +72,7 @@ public class TreeService {
         List<Member> acceptedMembers = friendCheckService.getFriendMembers(userId);
 
         if (!acceptedMembers.contains(friendMember)) {
-            throw new UnauthorizedException("친구의 나무만 조회 가능합니다.");
+            throw new TodakException(ONLY_FRIEND_TREE_LOOKUP_ERROR);
         }
 
         Tree tree = treeRepository.findByMember(friendMember).toDomain();
@@ -81,6 +82,6 @@ public class TreeService {
 
     private Member getMember(String userId) {
         return memberRepository.findByUserId(userId)
-                .orElseThrow(() -> new NotFoundException("userId에 해당하는 멤버가 없습니다."));
+                .orElseThrow(() -> new TodakException(USER_NOT_FOUND_ERROR));
     }
 }

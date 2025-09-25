@@ -1,8 +1,8 @@
 package com.gdg.Todak.member.service;
 
+import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.member.domain.Jwt;
 import com.gdg.Todak.member.domain.Member;
-import com.gdg.Todak.member.exception.UnauthorizedException;
 import com.gdg.Todak.member.repository.MemberRepository;
 import com.gdg.Todak.member.service.request.UpdateAccessTokenServiceRequest;
 import com.gdg.Todak.member.util.JwtProvider;
@@ -13,6 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import static com.gdg.Todak.common.exception.errors.MemberError.INVALID_TOKEN_ERROR;
+import static com.gdg.Todak.common.exception.errors.MemberError.MEMBER_NOT_FOUND_ERROR;
 
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -32,11 +35,11 @@ public class AuthService {
         String refreshToken = (String) redisTemplate.opsForValue().get(memberId);
 
         if (refreshToken == null) {
-            throw new UnauthorizedException("리프레시 토큰이 만료되었습니다.");
+            throw new TodakException(INVALID_TOKEN_ERROR);
         }
 
         if (!refreshToken.equals(request.getRefreshToken())) {
-            throw new UnauthorizedException("유효하지 않은 리프레시 토큰입니다.");
+            throw new TodakException(INVALID_TOKEN_ERROR);
         }
 
         String newAccessToken = createNewAccessToken(member);
@@ -49,9 +52,9 @@ public class AuthService {
 
     private Member getMember(String accessToken) {
         String userId = jwtProvider.getUserIdForReissue(accessToken)
-            .orElseThrow(() -> new UnauthorizedException("존재하지 않는 유저정보 입니다."));
+                .orElseThrow(() -> new TodakException(MEMBER_NOT_FOUND_ERROR));
         Member member = memberRepository.findByUserId(userId)
-            .orElseThrow(() -> new UnauthorizedException("존재하지 않는 유저정보 입니다."));
+                .orElseThrow(() -> new TodakException(MEMBER_NOT_FOUND_ERROR));
         return member;
     }
 

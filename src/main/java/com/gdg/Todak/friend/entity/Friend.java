@@ -1,13 +1,14 @@
 package com.gdg.Todak.friend.entity;
 
-import com.gdg.Todak.friend.FriendStatus;
-import com.gdg.Todak.friend.exception.BadRequestException;
+import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.member.domain.Member;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+
+import static com.gdg.Todak.common.exception.errors.FriendError.NOT_PENDING_REQUEST_ERROR;
 
 @Entity
 @Builder
@@ -42,14 +43,14 @@ public class Friend {
 
     public void acceptFriendRequest() {
         if (!this.friendStatus.equals(FriendStatus.PENDING)) {
-            throw new BadRequestException("대기중인 친구 요청이 아닙니다.");
+            throw new TodakException(NOT_PENDING_REQUEST_ERROR);
         }
         this.friendStatus = FriendStatus.ACCEPTED;
     }
 
     public void declinedFriendRequest() {
         if (!this.friendStatus.equals(FriendStatus.PENDING)) {
-            throw new BadRequestException("대기중인 친구 요청이 아닙니다.");
+            throw new TodakException(NOT_PENDING_REQUEST_ERROR);
         }
         this.friendStatus = FriendStatus.DECLINED;
     }

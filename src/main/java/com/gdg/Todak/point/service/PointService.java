@@ -1,5 +1,6 @@
 package com.gdg.Todak.point.service;
 
+import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.common.lock.LockWithMemberFactory;
 import com.gdg.Todak.member.domain.Member;
 import com.gdg.Todak.member.repository.MemberRepository;
@@ -9,9 +10,6 @@ import com.gdg.Todak.point.dto.PointLogRequest;
 import com.gdg.Todak.point.dto.PointRequest;
 import com.gdg.Todak.point.dto.PointResponse;
 import com.gdg.Todak.point.entity.Point;
-import com.gdg.Todak.point.exception.BadRequestException;
-import com.gdg.Todak.point.exception.ConflictException;
-import com.gdg.Todak.point.exception.NotFoundException;
 import com.gdg.Todak.point.repository.PointLogRepository;
 import com.gdg.Todak.point.repository.PointRepository;
 import com.gdg.Todak.tree.domain.GrowthButton;
@@ -25,6 +23,8 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
+
+import static com.gdg.Todak.common.exception.errors.PointError.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -56,7 +56,7 @@ public class PointService {
     @Transactional
     public Point createPoint(Member member) {
         if (pointRepository.existsByMember(member)) {
-            throw new ConflictException("이미 해당 멤버의 point 객체가 존재합니다.");
+            throw new TodakException(ALREADY_HAVE_POINT_OBJECT_ERROR);
         }
 
         Point point = Point.builder().member(member).build();
@@ -145,7 +145,7 @@ public class PointService {
         return switch (pointType) {
             case DIARY -> DIARY_WRITE_POINT;
             case COMMENT -> COMMENT_WRITE_POINT;
-            default -> throw new BadRequestException("해당하는 pointType이 없습니다");
+            default -> throw new TodakException(INVALID_POINT_TYPE_ERROR);
         };
     }
 
@@ -171,11 +171,11 @@ public class PointService {
 
     private Point getPoint(Member member) {
         return pointRepository.findByMember(member)
-                .orElseThrow(() -> new NotFoundException("member의 point 객체가 없습니다."));
+                .orElseThrow(() -> new TodakException(POINT_OBJECT_NOT_FOUND_ERROR));
     }
 
     private Member getMember(String userId) {
         return memberRepository.findByUserId(userId)
-                .orElseThrow(() -> new NotFoundException("userId에 해당하는 멤버가 없습니다."));
+                .orElseThrow(() -> new TodakException(USER_NOT_FOUND_ERROR));
     }
 }
