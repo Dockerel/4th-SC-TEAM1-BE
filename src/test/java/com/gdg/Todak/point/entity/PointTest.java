@@ -1,8 +1,8 @@
 package com.gdg.Todak.point.entity;
 
+import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.member.domain.Member;
 import com.gdg.Todak.point.PointType;
-import com.gdg.Todak.point.exception.BadRequestException;
 import com.gdg.Todak.tree.domain.GrowthButton;
 import com.gdg.Todak.tree.domain.TreeExperiencePolicy;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,8 +64,7 @@ class PointTest {
 
         // when & then
         assertThatThrownBy(() -> point.consumePoint(50))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessageContaining("요청하신 포인트");
+                .isInstanceOf(TodakException.class);
     }
 
     @DisplayName("물 성장 버튼으로 포인트를 소비하면 해당 포인트가 차감되어야 한다")

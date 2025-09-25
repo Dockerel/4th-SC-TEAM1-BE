@@ -1,13 +1,12 @@
 package com.gdg.Todak.guestbook.service;
 
+import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.friend.service.FriendCheckService;
 import com.gdg.Todak.guestbook.controller.dto.AddGuestbookRequest;
 import com.gdg.Todak.guestbook.controller.dto.AddGuestbookResponse;
 import com.gdg.Todak.guestbook.controller.dto.DeleteGuestbookRequest;
 import com.gdg.Todak.guestbook.controller.dto.GetGuestbookResponse;
 import com.gdg.Todak.guestbook.entity.Guestbook;
-import com.gdg.Todak.guestbook.exception.NotFoundException;
-import com.gdg.Todak.guestbook.exception.UnauthorizedException;
 import com.gdg.Todak.guestbook.repository.GuestbookRepository;
 import com.gdg.Todak.member.domain.AuthenticateUser;
 import com.gdg.Todak.member.domain.Member;
@@ -151,7 +150,7 @@ class GuestbookServiceTest {
 
         // when // then
         assertThatThrownBy(() -> guestbookService.deleteGuestbook(authenticateUser, request))
-                .isInstanceOf(NotFoundException.class);
+                .isInstanceOf(TodakException.class);
     }
 
     @DisplayName("방명록 주인이 아닌 사람이 방명록을 삭제하면 예외가 발생한다.")
@@ -167,7 +166,7 @@ class GuestbookServiceTest {
 
         // when // then
         assertThatThrownBy(() -> guestbookService.deleteGuestbook(notOwnerAuthenticateUser, request))
-                .isInstanceOf(UnauthorizedException.class);
+                .isInstanceOf(TodakException.class);
     }
 
 }

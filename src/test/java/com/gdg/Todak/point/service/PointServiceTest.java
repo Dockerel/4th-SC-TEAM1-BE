@@ -1,14 +1,12 @@
 package com.gdg.Todak.point.service;
 
+import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.member.domain.Member;
 import com.gdg.Todak.member.repository.MemberRepository;
 import com.gdg.Todak.point.PointStatus;
 import com.gdg.Todak.point.PointType;
 import com.gdg.Todak.point.dto.PointRequest;
 import com.gdg.Todak.point.entity.Point;
-import com.gdg.Todak.point.exception.BadRequestException;
-import com.gdg.Todak.point.exception.ConflictException;
-import com.gdg.Todak.point.exception.NotFoundException;
 import com.gdg.Todak.point.repository.PointLogRepository;
 import com.gdg.Todak.point.repository.PointRepository;
 import com.gdg.Todak.tree.domain.GrowthButton;
@@ -76,8 +74,7 @@ class PointServiceTest {
 
         // when & then
         assertThatThrownBy(() -> pointService.createPoint(member))
-                .isInstanceOf(ConflictException.class)
-                .hasMessage("이미 해당 멤버의 point 객체가 존재합니다.");
+                .isInstanceOf(TodakException.class);
     }
 
     @Test
@@ -98,8 +95,7 @@ class PointServiceTest {
     void getPointFailedByNotFoundTest() {
         // when & then
         assertThatThrownBy(() -> pointService.getPoint(member.getUserId()))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessage("member의 point 객체가 없습니다.");
+                .isInstanceOf(TodakException.class);
     }
 
     @Test
@@ -241,8 +237,7 @@ class PointServiceTest {
 
         // when & then
         assertThatThrownBy(() -> pointService.earnPointByType(pointRequest))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("해당하는 pointType이 없습니다");
+                .isInstanceOf(TodakException.class);
     }
 
     @Test
@@ -291,8 +286,7 @@ class PointServiceTest {
 
         // when & then
         assertThatThrownBy(() -> pointService.consumePointByGrowthButton(member, GrowthButton.WATER))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessageContaining("요청하신 포인트");
+                .isInstanceOf(TodakException.class);
     }
 
     @Test

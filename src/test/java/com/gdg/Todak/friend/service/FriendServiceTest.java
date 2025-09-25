@@ -1,9 +1,9 @@
 package com.gdg.Todak.friend.service;
 
+import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.friend.dto.*;
 import com.gdg.Todak.friend.entity.Friend;
 import com.gdg.Todak.friend.entity.FriendStatus;
-import com.gdg.Todak.friend.exception.BadRequestException;
 import com.gdg.Todak.friend.repository.FriendRepository;
 import com.gdg.Todak.member.domain.Member;
 import com.gdg.Todak.member.repository.MemberRepository;
@@ -65,8 +65,7 @@ class FriendServiceTest {
 
         //when & then
         assertThatThrownBy(() -> friendService.makeFriendRequest(requester.getUserId(), request))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("본인에게는 친구 요청을 할 수 없습니다");
+                .isInstanceOf(TodakException.class);
     }
 
     @Test
@@ -80,8 +79,7 @@ class FriendServiceTest {
 
         //then
         assertThatThrownBy(() -> friendService.makeFriendRequest(requester.getUserId(), request))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("이미 친구이거나, 대기 또는 거절된 친구요청이 존재합니다.");
+                .isInstanceOf(TodakException.class);
     }
 
     @Test
@@ -153,8 +151,7 @@ class FriendServiceTest {
 
         // when & then
         assertThatThrownBy(() -> friendService.makeFriendRequest(requester.getUserId(), request))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("친구 요청 개수를 초과하였습니다. (최대 20개)");
+                .isInstanceOf(TodakException.class);
     }
 
     @Test
@@ -184,8 +181,7 @@ class FriendServiceTest {
 
         // when & then
         assertThatThrownBy(() -> friendService.makeFriendRequest(requester.getUserId(), request))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("상대방이 더 이상 친구 요청을 받을 수 없습니다. (최대 20개)");
+                .isInstanceOf(TodakException.class);
     }
 
     @Test

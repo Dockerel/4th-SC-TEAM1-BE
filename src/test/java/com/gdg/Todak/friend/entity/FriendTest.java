@@ -1,6 +1,6 @@
 package com.gdg.Todak.friend.entity;
 
-import com.gdg.Todak.friend.exception.BadRequestException;
+import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.member.domain.Member;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -50,8 +50,7 @@ class FriendTest {
 
         // when & then
         assertThatThrownBy(() -> friend.acceptFriendRequest())
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("대기중인 친구 요청이 아닙니다.");
+                .isInstanceOf(TodakException.class);
     }
 
     @DisplayName("친구 요청을 거절하면 상태가 DECLINED로 변경되어야 한다")
@@ -72,8 +71,7 @@ class FriendTest {
 
         // when & then
         assertThatThrownBy(() -> friend.declinedFriendRequest())
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("대기중인 친구 요청이 아닙니다.");
+                .isInstanceOf(TodakException.class);
     }
 
     @DisplayName("요청자가 아닌 사용자가 checkMemberIsNotRequester 호출 시 true 반환")

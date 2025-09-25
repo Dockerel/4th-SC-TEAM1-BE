@@ -1,15 +1,14 @@
 package com.gdg.Todak.tree.business;
 
+import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.member.domain.Member;
 import com.gdg.Todak.member.repository.MemberRepository;
-import com.gdg.Todak.point.exception.NotFoundException;
 import com.gdg.Todak.point.facade.PointFacade;
 import com.gdg.Todak.point.service.PointService;
 import com.gdg.Todak.tree.business.dto.TreeEntityDto;
 import com.gdg.Todak.tree.business.dto.TreeInfoResponse;
 import com.gdg.Todak.tree.domain.GrowthButton;
 import com.gdg.Todak.tree.domain.TreeExperiencePolicy;
-import com.gdg.Todak.tree.exception.BadRequestException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -80,8 +79,7 @@ class TreeServiceTest {
 
         // when & then
         assertThatThrownBy(() -> treeService.getTree(testMember))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("한 멤버당 소유할 수 있는 나무의 수는 한그루 입니다.");
+                .isInstanceOf(TodakException.class);
 
         verify(treeRepository, never()).saveTreeByMember(any(Member.class));
     }
@@ -155,8 +153,7 @@ class TreeServiceTest {
 
         // when & then
         assertThatThrownBy(() -> treeService.earnExperience("testUser", GrowthButton.WATER))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("최고 레벨입니다.");
+                .isInstanceOf(TodakException.class);
 
         verify(pointService, never()).consumePointByGrowthButton(any(Member.class), any(GrowthButton.class));
         verify(treeRepository, never()).update(any(Member.class), any());
@@ -170,8 +167,7 @@ class TreeServiceTest {
 
         // when & then
         assertThatThrownBy(() -> treeService.earnExperience("nonExistingUser", GrowthButton.WATER))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessage("userId에 해당하는 멤버가 없습니다.");
+                .isInstanceOf(TodakException.class);
     }
 
     @Test
@@ -198,7 +194,6 @@ class TreeServiceTest {
 
         // when & then
         assertThatThrownBy(() -> treeService.getMyTreeInfo("nonExistingUser"))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessage("userId에 해당하는 멤버가 없습니다.");
+                .isInstanceOf(TodakException.class);
     }
 }

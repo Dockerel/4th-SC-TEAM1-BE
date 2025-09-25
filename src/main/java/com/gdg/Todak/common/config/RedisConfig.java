@@ -31,20 +31,20 @@ public class RedisConfig {
         return lettuceConnectionFactory;
     }
 
-    @Bean
-    public RedisTemplate<String, String> redisTemplate() {
-        RedisTemplate<String, String> template = new RedisTemplate<>();
-        template.setConnectionFactory(connectionFactory());
-
-        StringRedisSerializer stringSerializer = new StringRedisSerializer();
-        template.setKeySerializer(stringSerializer);
-        template.setValueSerializer(stringSerializer);
-        template.setHashKeySerializer(stringSerializer);
-        template.setHashValueSerializer(stringSerializer);
-
-        template.afterPropertiesSet();
-        return template;
-    }
+//    @Bean
+//    public RedisTemplate<String, String> redisTemplate() {
+//        RedisTemplate<String, String> template = new RedisTemplate<>();
+//        template.setConnectionFactory(connectionFactory());
+//
+//        StringRedisSerializer stringSerializer = new StringRedisSerializer();
+//        template.setKeySerializer(stringSerializer);
+//        template.setValueSerializer(stringSerializer);
+//        template.setHashKeySerializer(stringSerializer);
+//        template.setHashValueSerializer(stringSerializer);
+//
+//        template.afterPropertiesSet();
+//        return template;
+//    }
 
     @Bean
     public RedisMessageListenerContainer redisContainer(RedisSubscriberService redisSubscriberService) {

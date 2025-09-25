@@ -1,6 +1,6 @@
 package com.gdg.Todak.event.listener;
 
-import com.gdg.Todak.common.lock.exception.LockException;
+import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.event.event.LoginEvent;
 import com.gdg.Todak.event.event.NewCommentEvent;
 import com.gdg.Todak.event.event.NewDiaryEvent;
@@ -29,7 +29,7 @@ public class PointEarningListener {
     @Async
     @Retryable(
             value = {
-                    LockException.class,
+                    TodakException.class,
                     DeadlockLoserDataAccessException.class
             },
             backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, random = true)
@@ -48,7 +48,7 @@ public class PointEarningListener {
     @Async
     @Retryable(
             value = {
-                    LockException.class,
+                    TodakException.class,
                     DeadlockLoserDataAccessException.class
             },
             backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, random = true)

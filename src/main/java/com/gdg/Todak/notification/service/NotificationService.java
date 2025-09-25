@@ -42,7 +42,7 @@ public class NotificationService {
     }
 
     public List<Notification> getStoredMessages(String userId) {
-        return notificationRepository.findAllByReceiverId(userId);
+        return notificationRepository.findAllByReceiverUserId(userId);
     }
 
     private void sendHeartbeat(String userId, SseEmitter emitter, ScheduledExecutorService executor) {

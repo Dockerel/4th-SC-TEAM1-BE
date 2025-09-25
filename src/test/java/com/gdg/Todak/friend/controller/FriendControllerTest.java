@@ -1,6 +1,7 @@
 package com.gdg.Todak.friend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gdg.Todak.common.interceptor.QueryCountInterceptor;
 import com.gdg.Todak.friend.dto.*;
 import com.gdg.Todak.friend.entity.FriendStatus;
 import com.gdg.Todak.friend.facade.FriendFacade;
@@ -55,6 +56,9 @@ class FriendControllerTest {
     private AdminLoginCheckInterceptor adminLoginCheckInterceptor;
 
     @MockitoBean
+    private QueryCountInterceptor queryCountInterceptor;
+
+    @MockitoBean
     private MemberRepository memberRepository;
 
     @BeforeEach
@@ -66,6 +70,7 @@ class FriendControllerTest {
 
         when(loginMemberArgumentResolver.supportsParameter(any())).thenReturn(true);
         when(loginMemberArgumentResolver.resolveArgument(any(), any(), any(), any())).thenReturn(authenticateUser);
+        when(queryCountInterceptor.preHandle(any(), any(), any())).thenReturn(true);
     }
 
     @Test

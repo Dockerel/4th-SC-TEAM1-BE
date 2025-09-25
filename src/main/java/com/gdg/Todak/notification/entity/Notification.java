@@ -2,6 +2,8 @@ package com.gdg.Todak.notification.entity;
 
 import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.notification.dto.PublishNotificationRequest;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,7 +16,9 @@ import static com.gdg.Todak.common.exception.errors.NotificationError.SENDER_AND
 @Getter
 @ToString
 @NoArgsConstructor
+@Entity
 public class Notification {
+    @Id
     private Long id;
     private Long objectId;
     private String senderUserId;

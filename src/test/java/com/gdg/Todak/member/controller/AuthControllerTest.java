@@ -34,7 +34,7 @@ class AuthControllerTest extends ControllerTestSupport {
                 .build();
 
         // when
-        when(authService.updateAccessToken(any(UpdateAccessTokenServiceRequest.class))).thenReturn(jwt);
+        when(authService.updateAccessToken(any())).thenReturn(jwt);
 
         // then
         mockMvc.perform(

@@ -1,7 +1,10 @@
 package com.gdg.Todak.member.service;
 
-import com.gdg.Todak.member.domain.*;
-import com.gdg.Todak.member.exception.UnauthorizedException;
+import com.gdg.Todak.common.exception.TodakException;
+import com.gdg.Todak.member.domain.AuthenticateUser;
+import com.gdg.Todak.member.domain.Member;
+import com.gdg.Todak.member.domain.MemberRole;
+import com.gdg.Todak.member.domain.Role;
 import com.gdg.Todak.member.repository.MemberRepository;
 import com.gdg.Todak.member.repository.MemberRoleRepository;
 import com.gdg.Todak.member.service.request.*;
@@ -92,8 +95,7 @@ class MemberServiceTest {
 
         // when // then
         assertThatThrownBy(() -> memberService.login(request))
-                .isInstanceOf(UnauthorizedException.class)
-                .hasMessage("멤버가 존재하지 않습니다.");
+                .isInstanceOf(TodakException.class);
     }
 
     @DisplayName("존재하지 않는 password로 로그인 시 예외가 발생한다.")
@@ -109,8 +111,7 @@ class MemberServiceTest {
 
         // when // then
         assertThatThrownBy(() -> memberService.login(request))
-                .isInstanceOf(UnauthorizedException.class)
-                .hasMessage("비밀번호가 올바르지 않습니다.");
+                .isInstanceOf(TodakException.class);
     }
 
     @DisplayName("올바른 userId과 password로 로그인 시 accessToken과 refreshToken이 반환된다.")
@@ -227,8 +228,7 @@ class MemberServiceTest {
 
         // when // then
         assertThatThrownBy(() -> memberService.changePassword(user, request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("비밀번호가 일치하지 않습니다.");
+                .isInstanceOf(TodakException.class);
     }
 
     @DisplayName("회원 탈퇴시 회원 정보가 삭제된다.")

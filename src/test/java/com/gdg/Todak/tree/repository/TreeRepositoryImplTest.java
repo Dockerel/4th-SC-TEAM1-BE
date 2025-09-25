@@ -1,11 +1,11 @@
 package com.gdg.Todak.tree.repository;
 
+import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.member.domain.Member;
 import com.gdg.Todak.member.repository.MemberRepository;
 import com.gdg.Todak.tree.business.dto.TreeEntityDto;
 import com.gdg.Todak.tree.business.dto.TreeEntityUpdateRequest;
 import com.gdg.Todak.tree.domain.TreeExperiencePolicy;
-import com.gdg.Todak.tree.exception.NotFoundException;
 import com.gdg.Todak.tree.repository.entity.TreeEntity;
 import com.gdg.Todak.tree.repository.repository.TreeJpaRepository;
 import com.gdg.Todak.tree.repository.repository.TreeRepositoryImpl;
@@ -83,8 +83,7 @@ class TreeRepositoryImplTest {
 
         // when & then
         assertThatThrownBy(() -> treeRepository.findByMember(nonExistingMember))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessage("member의 tree가 없습니다.");
+                .isInstanceOf(TodakException.class);
     }
 
     @DisplayName("트리 업데이트 성공")

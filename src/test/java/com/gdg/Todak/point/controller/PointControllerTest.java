@@ -1,6 +1,7 @@
 package com.gdg.Todak.point.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gdg.Todak.common.interceptor.QueryCountInterceptor;
 import com.gdg.Todak.member.Interceptor.AdminLoginCheckInterceptor;
 import com.gdg.Todak.member.Interceptor.LoginCheckInterceptor;
 import com.gdg.Todak.member.domain.AuthenticateUser;
@@ -61,11 +62,15 @@ class PointControllerTest {
     private AdminLoginCheckInterceptor adminLoginCheckInterceptor;
 
     @MockitoBean
+    private QueryCountInterceptor queryCountInterceptor;
+
+    @MockitoBean
     private MemberRepository memberRepository;
 
     @BeforeEach
     void setUp() throws Exception {
         when(loginCheckInterceptor.preHandle(any(), any(), any())).thenReturn(true);
+        when(queryCountInterceptor.preHandle(any(), any(), any())).thenReturn(true);
     }
 
     @Test
