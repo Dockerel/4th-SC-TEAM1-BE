@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Getter
@@ -30,20 +31,10 @@ public class Member {
 
     private String salt;
 
-    private boolean aiCommentEnabled;
+    private boolean isSocialAccount;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<MemberRole> memberRoles = new HashSet<>();
-
-    @Builder
-    public Member(String userId, String password, String nickname, String imageUrl, String salt, boolean aiCommentEnabled) {
-        this.userId = userId;
-        this.password = password;
-        this.nickname = nickname;
-        this.imageUrl = imageUrl;
-        this.salt = salt;
-        this.aiCommentEnabled = aiCommentEnabled;
-    }
 
     @Builder
     public Member(String userId, String password, String nickname, String imageUrl, String salt) {
@@ -52,6 +43,12 @@ public class Member {
         this.nickname = nickname;
         this.imageUrl = imageUrl;
         this.salt = salt;
+        this.isSocialAccount = false;
+    }
+
+    public static Member of(String userId, String nickname, String imageUrl) {
+        String string = UUID.randomUUID().toString();
+        return Member.of(userId, string, nickname, imageUrl, string);
     }
 
     public static Member of(String userId, String password, String nickname, String imageUrl, String salt) {
@@ -61,7 +58,6 @@ public class Member {
             .nickname(nickname)
             .imageUrl(imageUrl)
             .salt(salt)
-            .aiCommentEnabled(true)
             .build();
     }
 
@@ -74,31 +70,19 @@ public class Member {
             .map(MemberRole::getRole).collect(Collectors.toSet());
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
-    public void setNickname(String nickname) {
+    public void changeNickname(String nickname) {
         this.nickname = nickname;
     }
 
-    public void setPassword(String password) {
+    public void changePassword(String password) {
         this.password = password;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public void enableAiComment() {
-        this.aiCommentEnabled = true;
-    }
-
-    public void disableAiComment() {
-        this.aiCommentEnabled = false;
     }
 
     public void updateImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public void setSocialAccount() {
+        isSocialAccount = true;
     }
 }

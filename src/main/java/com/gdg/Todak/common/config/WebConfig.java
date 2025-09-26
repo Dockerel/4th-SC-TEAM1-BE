@@ -53,6 +53,8 @@ public class WebConfig implements WebMvcConfigurer {
 
             "/api/v1/auth/reissue",
 
+            "/api/v1/oauth/**",
+
             "/api/v1/make/uuid",
 
             "/swagger-ui/**",

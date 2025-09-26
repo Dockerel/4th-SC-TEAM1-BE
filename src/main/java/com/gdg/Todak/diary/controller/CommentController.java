@@ -39,10 +39,7 @@ public class CommentController {
     public ApiResponse<Page<CommentResponse>> getComments(@PathVariable("diaryId") Long diaryId,
                                                           @Parameter(hidden = true) @Login AuthenticateUser authenticateUser,
                                                           @Parameter(hidden = true) @PageableDefault Pageable pageable) {
-        System.out.println("CommentController.getComments");
         Page<CommentResponse> commentResponses = commentService.getComments(authenticateUser.getUserId(), diaryId, pageable);
-        int size = commentResponses.getSize();
-        System.out.println("size = " + size);
         return ApiResponse.ok(commentResponses);
     }
 

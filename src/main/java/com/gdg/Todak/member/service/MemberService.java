@@ -81,8 +81,11 @@ public class MemberService {
 
     @Transactional
     public LoginResponse login(LoginServiceRequest request) {
-
         Member member = findMemberByUserId(request.getUserId());
+
+        if (member.isSocialAccount()) {
+            throw new TodakException(IS_SOCIAL_ACCOUNT_ERROR);
+        }
 
         checkPassword(request.getPassword(), member);
 
@@ -118,7 +121,7 @@ public class MemberService {
     @Transactional
     public MeResponse editMemberNickname(AuthenticateUser user, EditMemberNicknameServiceRequest serviceRequest) {
         Member member = findMemberByUserId(user.getUserId());
-        member.setNickname(serviceRequest.getNickname());
+        member.changeNickname(serviceRequest.getNickname());
         return MeResponse.of(member.getUserId(), member.getNickname(), member.getImageUrl());
     }
 
@@ -240,20 +243,6 @@ public class MemberService {
     }
 
     @Transactional
-    public String enableAiComment(AuthenticateUser user) {
-        Member member = findMemberByUserId(user.getUserId());
-        member.enableAiComment();
-        return "AI 댓글 기능이 활성화되었습니다.";
-    }
-
-    @Transactional
-    public String disableAiComment(AuthenticateUser user) {
-        Member member = findMemberByUserId(user.getUserId());
-        member.disableAiComment();
-        return "AI 댓글 기능이 비활성화되었습니다.";
-    }
-
-    @Transactional
     public String changePassword(AuthenticateUser user, ChangePasswordServiceRequest request) {
         Member member = findMemberByUserId(user.getUserId());
 
@@ -267,7 +256,7 @@ public class MemberService {
 
         String encodedPassword = PasswordEncoder.getEncodedPassword(salt, request.getNewPassword());
 
-        member.setPassword(encodedPassword);
+        member.changePassword(encodedPassword);
 
         return "비밀번호가 변경되었습니다.";
     }

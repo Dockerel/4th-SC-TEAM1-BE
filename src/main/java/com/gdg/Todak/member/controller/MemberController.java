@@ -44,7 +44,7 @@ public class MemberController {
 
     @PostMapping("/login")
     @Operation(summary = "로그인", description = "유저 아이디와 비밀번호로 로그인한다. 성공시 accessToken과 refreshToken이 반환된다.")
-    public ApiResponse<LoginResponse> login(@RequestBody LoginRequest request, HttpServletResponse response) {
+    public ApiResponse<String> login(@RequestBody LoginRequest request, HttpServletResponse response) {
         LoginResponse tokens = memberService.login(request.toServiceRequest());
 
         ResponseCookie refresh = ResponseCookie.from(REFRESH_TOKEN, tokens.getRefreshToken())
@@ -101,17 +101,5 @@ public class MemberController {
     @Operation(summary = "계정 탈퇴", description = "회원 정보를 삭제하고 계정을 탈퇴한다.")
     public ApiResponse<Void> deleteMember(@Parameter(hidden = true) @Login AuthenticateUser user) {
         return ApiResponse.ok(memberService.deleteMember(user));
-    }
-
-    @PostMapping("/ai-comment/enable")
-    @Operation(summary = "AI 댓글 기능 활성화", description = "AI 댓글 기능을 활성화한다.")
-    public ApiResponse<Void> enableAiComment(@Parameter(hidden = true) @Login AuthenticateUser user) {
-        return ApiResponse.ok(memberService.enableAiComment(user));
-    }
-
-    @PostMapping("/ai-comment/disable")
-    @Operation(summary = "AI 댓글 기능 비활성화", description = "AI 댓글 기능을 비활성화한다.")
-    public ApiResponse<Void> disableAiComment(@Parameter(hidden = true) @Login AuthenticateUser user) {
-        return ApiResponse.ok(memberService.disableAiComment(user));
     }
 }
