@@ -23,6 +23,9 @@ public enum MemberError implements ErrorInfo {
 
     INVALID_TOKEN_ERROR(UNAUTHORIZED, "토큰이 없거나, 헤더 형식에 맞지 않습니다."),
     PASSWORD_ERROR(UNAUTHORIZED, "비밀번호가 올바르지 않습니다."),
+    NAVER_OAUTH_STATE_ERROR(UNAUTHORIZED, "네이버 로그인 중 문제가 발생했습니다."),
+    NOT_SOCIAL_ACCOUNT_ERROR(UNAUTHORIZED, "소셜 로그인 계정이 아닙니다."),
+    IS_SOCIAL_ACCOUNT_ERROR(UNAUTHORIZED, "소셜 로그인 계정입니다."),
 
     MEMBER_NOT_FOUND_ERROR(NOT_FOUND, "존재하지 않는 유저정보 입니다."),
 
