@@ -17,6 +17,6 @@ public class NotificationFacade {
 
         notificationService.saveNotification(request);
 
-        notificationService.publishEventToRedis(Notification.from(request));
+        notificationService.publishNotification(Notification.from(request));
     }
 }
