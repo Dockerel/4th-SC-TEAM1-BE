@@ -3,12 +3,14 @@ package com.gdg.Todak.notification.dto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.time.Instant;
 
 @Getter
 @Builder
 @AllArgsConstructor
+@ToString
 public class PublishNotificationRequest {
     private String senderId;
     private String receiverId;
