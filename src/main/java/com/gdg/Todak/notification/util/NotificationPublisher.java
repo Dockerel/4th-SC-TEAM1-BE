@@ -13,6 +13,6 @@ public class NotificationPublisher {
     private final RabbitTemplate rabbitTemplate;
 
     public void publishSaveNotificationMessage(PublishNotificationRequest request) {
-        rabbitTemplate.convertAndSend(RabbitMQConfig.SAVE_NOTIFICATION_QUEUE, RabbitMQConfig.SAVE_NOTIFICATION_QUEUE, request);
+        rabbitTemplate.convertAndSend(RabbitMQConfig.SAVE_NOTIFICATION_EXCHANGE, RabbitMQConfig.SAVE_NOTIFICATION_QUEUE, request);
     }
 }
