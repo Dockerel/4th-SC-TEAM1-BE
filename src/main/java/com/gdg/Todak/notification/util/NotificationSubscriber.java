@@ -27,7 +27,7 @@ public class NotificationSubscriber {
         rabbitTemplate.convertAndSend(RabbitMQConfig.PUBLISH_NOTIFICATION_EXCHANGE, "", notification);
     }
 
-    @RabbitListener(queues = RabbitMQConfig.PUBLISH_NOTIFICATION_QUEUE)
+    @RabbitListener(queues = "#{@dynamicPublishNotificationQueueName}")
     public void consumePublishNotificationMessage(Notification notification) {
         notificationService.publishNotification(notification);
     }

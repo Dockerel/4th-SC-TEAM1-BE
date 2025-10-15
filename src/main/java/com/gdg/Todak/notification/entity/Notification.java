@@ -3,6 +3,8 @@ package com.gdg.Todak.notification.entity;
 import com.gdg.Todak.common.exception.TodakException;
 import com.gdg.Todak.notification.dto.PublishNotificationRequest;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,6 +21,7 @@ import static com.gdg.Todak.common.exception.errors.NotificationError.SENDER_AND
 @Entity
 public class Notification {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long objectId;
     private String senderUserId;
