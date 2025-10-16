@@ -44,6 +44,9 @@ dependencies {
     implementation 'org.redisson:redisson-spring-boot-starter:3.23.1'
     implementation 'org.springframework.session:spring-session-data-redis'
 
+    // RabbitMQ
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -71,6 +74,7 @@ dependencies {
     implementation 'net.javacrumbs.shedlock:shedlock-spring:5.1.0'
     implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:5.1.0'
     implementation 'org.springframework.retry:spring-retry'
+    implementation 'com.slack.api:slack-api-client:1.27.2'
 }
 
 tasks.named('test') {

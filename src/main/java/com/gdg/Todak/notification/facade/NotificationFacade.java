@@ -3,6 +3,7 @@ package com.gdg.Todak.notification.facade;
 import com.gdg.Todak.notification.dto.PublishNotificationRequest;
 import com.gdg.Todak.notification.entity.Notification;
 import com.gdg.Todak.notification.service.NotificationService;
+import com.gdg.Todak.notification.util.NotificationPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -10,13 +11,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class NotificationFacade {
 
-    private final NotificationService notificationService;
+    private final NotificationPublisher notificationPublisher;
 
     public void publishNotification(PublishNotificationRequest request) {
         Notification.checkNotificationSenderAndReceiver(request);
 
-        notificationService.saveNotification(request);
-
-        notificationService.publishNotification(Notification.from(request));
+        notificationPublisher.publishSaveNotificationMessage(request);
     }
 }
