@@ -1,12 +1,12 @@
 package com.gdg.Todak.notification.config;
 
 import org.springframework.amqp.core.*;
-import org.springframework.amqp.rabbit.config.RetryInterceptorBuilder;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,8 +40,11 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Binding saveNotificationBinding() {
-        return BindingBuilder.bind(saveNotificationQueue()).to(saveNotificationExchange()).with(SAVE_NOTIFICATION_QUEUE);
+    public Binding saveNotificationBinding(
+            Queue saveNotificationQueue,
+            DirectExchange saveNotificationExchange
+    ) {
+        return BindingBuilder.bind(saveNotificationQueue).to(saveNotificationExchange).with(SAVE_NOTIFICATION_QUEUE);
     }
 
     // 알림 저장 데드레터 큐
@@ -56,8 +59,11 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Binding deadLetterBinding() {
-        return BindingBuilder.bind(deadLetterQueue()).to(deadLetterExchange()).with(DEAD_LETTER_QUEUE);
+    public Binding deadLetterBinding(
+            Queue deadLetterQueue,
+            DirectExchange deadLetterExchange
+    ) {
+        return BindingBuilder.bind(deadLetterQueue).to(deadLetterExchange).with(DEAD_LETTER_QUEUE);
     }
 
     // 알림 발송 큐
@@ -68,8 +74,8 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Queue publishNotificationQueue() {
-        return new Queue(dynamicPublishNotificationQueueName(), false);
+    public Queue publishNotificationQueue(@Qualifier("dynamicPublishNotificationQueueName") String queueName) {
+        return new Queue(queueName, false);
     }
 
     @Bean
@@ -78,8 +84,11 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Binding publishNotificationBinding() {
-        return BindingBuilder.bind(publishNotificationQueue()).to(publishNotificationExchange());
+    public Binding publishNotificationBinding(
+            Queue publishNotificationQueue,
+            FanoutExchange publishNotificationExchange
+    ) {
+        return BindingBuilder.bind(publishNotificationQueue).to(publishNotificationExchange);
     }
 
     // 직렬화, 역직렬화 설정
