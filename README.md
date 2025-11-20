@@ -110,8 +110,72 @@ public class NotificationSubscriber {
 
 ## 2. 락 획득 로직 개선 및 트랜잭션 최적화
 ### 개요
+* 서비스 레이어에서 일기, 댓글 작성 로직 실행 시 분산 락 획득, 포인트 획득, 알림 전송 등 여러 로직이 실행됨
+
 ### 문제 및 의사결정 과정
+* 서비스 레이어에서 트랜잭션 관리, 분산 락, 알림 전송 등 기술적 처리와 비즈니스 로직이 혼재되어 코드가 복잡해지고 역할이 불분명해짐
+* 부가 기능(포인트 획득, 알림 전송) 실패가 핵심 기능(일기 작성, 댓글 작성)의 트랜잭션까지 롤백시키는 등 기능 간 결합도가 높아 시스템 안정성과 확장성에 한계가 있음을 발견
+* 분산 락 획득 시 락 대기 구간에서 불필요하게 DB 커넥션이 점유되는 현상 발생
+
+#### 1. Facade 계층 도입
+* SRP를 실현하기 위해 Facade 계층을 도입해 기술적 처리와 비즈니스 로직을 분리
+```java
+@RequiredArgsConstructor
+@Component
+public class LockExecutor {
+
+    public static final int DELAY = 100;
+    public static final int MULTIPLIER = 2;
+
+    private final LockWithMemberFactory lockWithMemberFactory;
+
+    @Retryable(
+            value = {
+                    TodakException.class,
+                    DeadlockLoserDataAccessException.class
+            },
+            backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, random = true)
+    )
+    public void executeWithLock(String lockPrefix, Member member, Runnable runnable) {
+        String lockKey = lockPrefix + member.getId();
+        Lock lock = null;
+        try {
+            lock = lockWithMemberFactory.tryLock(member, lockKey, 10, 2);
+            runnable.run();
+        } finally {
+            if (lock != null) {
+                lockWithMemberFactory.unlock(member, lock);
+            }
+        }
+    }
+}
+```
+* 분산 락 획득과 트랜잭션 시작 시점을 분리하여 락 대기 중에는 DB 커넥션이 점유되지 않도록 설계
+* Spring ApplicationEvent를 활용해 부가 기능을 비동기 이벤트 기반으로 전환, 핵심 트랜잭션과 느슨하게 연결하여 결합도와 오류 전파 위험을 낮춤
+```java
+@EnableAsync
+@Configuration
+public class AsyncConfig {
+
+    @Bean(name = "steadyExecutor")
+    public Executor steadyExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(50);      // 높은 기본 스레드 수로 일정한 처리량 유지
+        executor.setMaxPoolSize(60);       // 약간의 여유만 두기
+        executor.setQueueCapacity(500);    // 큰 대기열로 일시적 부하 흡수
+        executor.setThreadNamePrefix("Steady-");
+        executor.setKeepAliveSeconds(60);  // 추가 스레드의 유휴 시간 제한
+        executor.initialize();
+        return executor;
+    }
+
+}
+```
+* 일정하게 발생하는 트래픽에 대응하기 위한 커스텀 스레드 설정 구현
+
 ### 성과
+* 평균 응답시간을 9.7s에서 333ms로 29배 단축하고 TPS를 6배 증가시켜 시스템 성능과 사용자 경험을 획기적으로 개선
+* 응답 속도 개선으로 일기, 댓글 작성 시 사용자 대기 시간이 크게 감소하여 서비스 이용 만족도가 향상
 
 ## 3. 포인트 로그 조회 속도 개선
 ### 개요
