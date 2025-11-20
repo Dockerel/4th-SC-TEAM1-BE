@@ -1,4 +1,7 @@
-<h1 align="center">토닥</h1>
+<div align="center">
+<img width="200" height="200" alt="image" src="https://github.com/user-attachments/assets/0bf28518-9aba-43d8-9b9e-2b491dfbb6d4" />
+<h1>토닥</h1>
+</div>
 
 ## 개요
 AI 기반 공감 응답을 통해 사용자의 지속적인 감정 관리를 지원하는 감정 케어 서비스
