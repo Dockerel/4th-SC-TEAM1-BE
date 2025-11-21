@@ -14,6 +14,7 @@ AI 기반 공감 응답을 통해 사용자의 지속적인 감정 관리를 지
 * [락 획득 로직 개선 및 트랜잭션 최적화](#2-락-획득-로직-개선-및-트랜잭션-최적화)
 * [포인트 로그 조회 속도 개선](#3-포인트-로그-조회-속도-개선)
 * 인증, 방명록, AI 댓글 생성 및 자동 작성 기능 개발
+* 포인트 로그 관리 Admin Dashboard 개발
 
 ## 1. 실시간 알림 기능 구현
 ### 개요
@@ -179,5 +180,17 @@ public class AsyncConfig {
 
 ## 3. 포인트 로그 조회 속도 개선
 ### 개요
+* 포인트 로그 조회 페이지에서 user_id, point_type, point_status를 기준으로 조회가 가능함
+
 ### 문제 및 의사결정 과정
+* MySQL 쿼리플랜 분석 결과, Admin Dashboard에서 포인트 로그를 복합 조건으로 대량 조회할 때 대용량 데이터에 적합한 인덱스가 없어 Full Table Scan이 발생함
+* 이로 인해 쿼리 타임아웃과 화면 응답 지연이 빈번하게 나타남
+* 복합 인덱스 도입으로 해결
+<div display="flex">
+	<img width="404" height="502" alt="image" src="https://github.com/user-attachments/assets/5029cb9a-fc9e-4925-8ce4-fa4b79d5231d" />
+	<img width="404" height="502" alt="image" src="https://github.com/user-attachments/assets/57642347-1cf2-4922-8d4e-93abb1683583" />
+</div>
+* 대표 패턴이 'userId + 포인트 유형/상태'로 카디널리티를 고려하여 (user_id, point_type, point_status : 카디널리티 내림차순) 복합 인덱스를 설계
+
 ### 성과
+* 포인트 로그 1,000,000건에 대해 조회 시간을 220ms &rarr; 24ms로 9배 개선
