@@ -6,6 +6,29 @@
 ## 개요
 AI 기반 공감 응답을 통해 사용자의 지속적인 감정 관리를 지원하는 감정 케어 서비스
 
+## 개발 정보
+* 2025.03 - 2025.06 (4M / 4명) [BE, AI]
+
+## 기술 스택
+<p dir="auto">
+<img src="https://img.shields.io/badge/-Java-DB6900?logo=Java&amp;logoColor=white&amp;labelColor=DB6900" style="max-width: 100%;">
+<br>
+<img src="https://img.shields.io/badge/-Spring-6DB33F?logo=Spring&amp;logoColor=white&amp;labelColor=6DB33F" style="max-width: 100%;">
+<img src="https://img.shields.io/badge/-SpringBoot-6DB33F?logo=springboot&amp;logoColor=white&amp;labelColor=6DB33F" style="max-width: 100%;">
+<img src="https://img.shields.io/badge/-SpringDataJpa-6DB33F?logo=SpringDataJpa&amp;logoColor=white&amp;labelColor=6DB33F" style="max-width: 100%;">
+<img src="https://img.shields.io/badge/-Junit5-25A162?logo=Junit5&amp;logoColor=white&amp;labelColor=25A162" style="max-width: 100%;">
+<br>
+<img src="https://img.shields.io/badge/-MySql-438CB2?logo=MySql&amp;logoColor=white&amp;labelColor=438CB2" style="max-width: 100%;">
+<img src="https://img.shields.io/badge/-Redis-FF4438?logo=Redis&amp;logoColor=white&amp;labelColor=FF4438" style="max-width: 100%;">
+<br>
+<img src="https://img.shields.io/badge/-RabbitMQ-FF6600?logo=RabbitMQ&amp;logoColor=white&amp;labelColor=FF6600" style="max-width: 100%;">
+<img src="https://img.shields.io/badge/-LangChain4j-1C3C3C?logo=LangChain&amp;logoColor=white&amp;labelColor=1C3C3C" style="max-width: 100%;">
+<br>
+<img src="https://img.shields.io/badge/-Prometheus-E6522C?logo=Prometheus&amp;logoColor=white&amp;labelColor=E6522C" style="max-width: 100%;">
+<img src="https://img.shields.io/badge/-Grafana-F46800?logo=Grafana&amp;logoColor=white&amp;labelColor=F46800" style="max-width: 100%;">
+<img src="https://img.shields.io/badge/-k6-7D64FF?logo=k6&amp;logoColor=white&amp;labelColor=7D64FF" style="max-width: 100%;">
+</p>
+
 ## 시스템 아키텍처
 <img width="832" height="540" alt="image" src="https://github.com/user-attachments/assets/7bd14135-d23e-42fa-871b-7b07f04f07c7" />
 
