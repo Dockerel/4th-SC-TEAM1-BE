@@ -216,4 +216,4 @@ public class AsyncConfig {
 * 대표 패턴이 'userId + 포인트 유형/상태'로 카디널리티를 고려하여 (user_id, point_type, point_status : 카디널리티 내림차순) 복합 인덱스를 설계
 
 ### 성과
-* 포인트 로그 1,000,000건에 대해 조회 시간을 220ms &rarr; 24ms로 9배 개선
+* 포인트 로그 1,000,000건에 대해 조회 시간을 220ms &rarr; 24ms로 90% 감소
